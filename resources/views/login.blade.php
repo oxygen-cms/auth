@@ -1,7 +1,7 @@
 @extends(Config::get('oxygen/core::layout'))
 
 <?php
-    $bodyClasses = [ 'Login--isHidden', 'Login-bodyTransition', 'Login-theme--' . Config::get('oxygen/auth::theme') ];
+    $bodyClasses = [ 'Body--noScroll', 'Login--isHidden', 'Login-bodyTransition', 'Login-theme--' . Config::get('oxygen/auth::theme') ];
     $usePage = false;
 ?>
 
