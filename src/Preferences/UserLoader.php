@@ -2,12 +2,21 @@
 
 namespace Oxygen\Auth\Preferences;
 
-use Oxygen\Auth\Model\User;
+use Oxygen\Auth\Entity\User;
+use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Preferences\Loader\LoaderInterface;
 use Oxygen\Preferences\Repository;
 use Oxygen\Preferences\Schema;
 
 class UserLoader implements LoaderInterface {
+
+    /**
+     * User repository.
+     *
+     * @var UserRepositoryInterface
+     */
+
+    protected $repository;
 
     /**
      * User model.
@@ -20,10 +29,12 @@ class UserLoader implements LoaderInterface {
     /**
      * Constructs the UserLoader.
      *
-     * @param User $user User model
+     * @param UserRepositoryInterface $repository
+     * @param User                    $user User model
      */
 
-    public function __construct(User $user = null) {
+    public function __construct(UserRepositoryInterface $repository, User $user = null) {
+        $this->repository = $repository;
         $this->user = $user;
     }
 
@@ -40,14 +51,15 @@ class UserLoader implements LoaderInterface {
     /**
      * Stores the preferences.
      *
-     * @param Repository $repository
+     * @param Repository $preferences
+     * @param Schema     $schema
      * @return void
      */
 
     public function store(Repository $preferences, Schema $schema) {
         $this->user->setPreferences($preferences);
         $this->user->syncPreferences();
-        $this->user->save();
+        $this->repository->persist($this->user);
     }
 
 }

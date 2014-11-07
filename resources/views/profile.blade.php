@@ -41,7 +41,7 @@
     </div>
     <?php
         foreach($blueprint->getFields() as $field) {
-            $field = StaticField::fromModel($field, $user, true);
+            $field = StaticField::fromEntity($field, $user, true);
             echo $field->render();
         }
     ?>

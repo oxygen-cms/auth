@@ -5,12 +5,18 @@ namespace Oxygen\Auth\Preferences;
 use Oxygen\Preferences\Repository;
 use Oxygen\Preferences\Transformer\JsonTransformer;
 
-trait PreferencesTrait {
+trait Preferences {
 
     /**
-     * JsonLoader loads preferences from a JSON string.
+     * @ORM\Column(type="text")
+     */
+
+    protected $preferences;
+
+    /**
+     * JsonTransformer loads preferences from a JSON string.
      *
-     * @var JsonLoader
+     * @var JsonTransformer
      */
 
     protected static $jsonTransformer;
@@ -23,16 +29,6 @@ trait PreferencesTrait {
      */
 
     protected $preferencesRepository;
-
-    /**
-     * Boot the preferences trait.
-     *
-     * @return void
-     */
-
-    public static function bootPreferencesTrait() {
-        static::$jsonTransformer = new JsonTransformer();
-    }
 
     /**
      * Returns the preferences repository.
@@ -61,12 +57,26 @@ trait PreferencesTrait {
     }
 
     /**
+     * Sets the raw preferences field.
+     *
+     * @param string $preferences
+     * @return $this
+     */
+
+    public function setPreferencesAsJson($preferences) {
+        $this->preferences = $preferences;
+        $this->preferencesRepository = $this->createPreferencesRepository();
+        return $this;
+    }
+
+    /**
      * Returns a new preferences repository from the given preferences.
      *
      * @return Repository
      */
 
     public function createPreferencesRepository() {
+        $this->createJsonTransformer();
         return static::$jsonTransformer->toRepository($this->preferences);
     }
 
@@ -77,7 +87,20 @@ trait PreferencesTrait {
      */
 
     public function syncPreferences() {
+        $this->createJsonTransformer();
         $this->preferences = static::$jsonTransformer->fromRepository($this->getPreferences(), true);
+    }
+
+    /**
+     * Creates the json transformer if needed.
+     *
+     * @return void
+     */
+
+    protected function createJsonTransformer() {
+        if(static::$jsonTransformer === null) {
+            static::$jsonTransformer = new JsonTransformer();
+        }
     }
 
 }

@@ -42,7 +42,7 @@
         );
 
         foreach($blueprint->getFields() as $field) {
-            $field = EditableField::fromModel($field, $user);
+            $field = EditableField::fromEntity($field, $user);
             echo $field->render();
         }
 

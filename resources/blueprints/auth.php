@@ -1,6 +1,7 @@
 <?php
 
-use Oxygen\Core\Action\Factory\ActionFactory;
+    use Carbon\Carbon;
+    use Oxygen\Core\Action\Factory\ActionFactory;
 use Oxygen\Core\Action\Group;
 use Oxygen\Core\Html\Dialog\Dialog;
 use Oxygen\Crud\BlueprintTrait\BasicCrudTrait;
@@ -132,7 +133,7 @@ Blueprint::make('Auth', function($blueprint) {
             'validationRules' => [ 'required', 'min:4', 'max:50', 'alpha_num', 'unique:{{ table }}' ]
         ],
         [
-            'name'      => 'full_name',
+            'name'      => 'fullName',
             'label'     => 'Full Name',
             'type'      => 'text',
             'editable'  => true,
@@ -146,21 +147,21 @@ Blueprint::make('Auth', function($blueprint) {
             'validationRules' => [ 'required', 'email', 'max:100' ]
         ],
         [
-            'name'      => 'group_id',
+            'name'      => 'group',
             'label'     => 'Group',
             'presenter' => function($value, $model) {
                 if($model !== null) {
-                    return $model->group->name;
+                    return $model->getGroup()->getName();
                 } else {
                     return $value;
                 }
             }
         ],
         [
-            'name'      => 'created_at',
+            'name'      => 'createdAt',
             'label'     => 'Joined',
-            'presenter' => function($value) {
-                return $value->diffForHumans();
+            'presenter' => function(DateTime $value) {
+                return Carbon::createFromTimestamp($value->getTimestamp())->diffForHumans();
             }
         ]
     ]);

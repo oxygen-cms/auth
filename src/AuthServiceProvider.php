@@ -2,12 +2,8 @@
 
 namespace Oxygen\Auth;
 
-use Illuminate\Support\ServiceProvider;
-
-use DirectoryIterator;
-
-use Oxygen\Core\Html\Toolbar\DropdownToolbarItem;
 use Oxygen\Core\Html\Navigation\Navigation;
+use Oxygen\Core\Support\ServiceProvider;
 use Oxygen\Preferences\Transformer\JavascriptTransformer;
 
 class AuthServiceProvider extends ServiceProvider {
@@ -26,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		$this->package('oxygen/auth', 'oxygen/auth', __DIR__ . '/../resources');
+        $this->entities(__DIR__ . '/Entity');
 
 		$this->app['router']->filter('oxygen.auth', 'Oxygen\Auth\Filter\AuthFilter@auth');
 		$this->app['router']->filter('oxygen.guest', 'Oxygen\Auth\Filter\AuthFilter@guest');
@@ -56,7 +53,7 @@ class AuthServiceProvider extends ServiceProvider {
 		$nav->add($blueprint->getToolbarItem('postLogout'), Navigation::SECONDARY);
 
 		if($this->app['auth']->check()) {
-			$name = $this->app['auth']->user()->full_name;
+			$name = $this->app['auth']->user()->getFullName();
 			$this->app['oxygen.navigation']->order(Navigation::SECONDARY, [
 				'System' => ['marketplace.getHome', 'preferences.getView'],
 				$name => ['auth.getInfo', 'auth.getPreferences', 'auth.postLogout']
@@ -88,6 +85,10 @@ class AuthServiceProvider extends ServiceProvider {
 	public function register() {
 		// Permissions System
         $this->app->bind('Oxygen\Auth\Permissions\PermissionsInterface', 'Oxygen\Auth\Permissions\SimplePermissionsSystem');
+
+        // Repositories
+        $this->app->bind('Oxygen\Auth\Repository\UserRepositoryInterface', 'Oxygen\Auth\Repository\DoctrineUserRepository');
+        $this->app->bind('Oxygen\Auth\Repository\GroupRepositoryInterface', 'Oxygen\Auth\Repository\DoctrineGroupRepository');
 	}
 
 	/**

@@ -9,6 +9,7 @@ use Config;
 use Hash;
 use Event;
 use Input;
+use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Redirect;
 use Response;
 use URL;
@@ -26,11 +27,12 @@ class AuthController extends BasicCrudController {
     /**
      * Constructs the AuthController.
      *
-     * @param BlueprintManager $manager
+     * @param UserRepositoryInterface $repository
+     * @param BlueprintManager        $manager
      */
 
-    public function __construct(BlueprintManager $manager) {
-        parent::__construct($manager, 'Auth', 'Oxygen\Auth\Model\User');
+    public function __construct(UserRepositoryInterface $repository, BlueprintManager $manager) {
+        parent::__construct($repository, $manager, 'Auth');
     }
 
     /**
@@ -75,7 +77,7 @@ class AuthController extends BasicCrudController {
 
             return Response::notification(
                 new Notification(
-                    Lang::get('oxygen/auth::messages.login.successful', ['name' => Auth::user()->full_name])
+                    Lang::get('oxygen/auth::messages.login.successful', ['name' => Auth::user()->getFullName()])
                 ),
                 ['redirect' => Config::get('oxygen/auth::dashboard')]
             );
@@ -151,7 +153,7 @@ class AuthController extends BasicCrudController {
     }
 
     /**
-     * Updates a Resource.
+     * Updates a the user.
      *
      * @param mixed $foo useless param
      * @return Response
@@ -200,15 +202,15 @@ class AuthController extends BasicCrudController {
         $validator = Validator::make(
             $input,
             [
-                'old_password' => ['required', 'hashes_to:' . $user->password],
+                'old_password' => ['required', 'hashes_to:' . $user->getPassword()],
                 'password' => ['required', 'confirmed'],
                 'password_confirmation' => ['required']
             ]
         );
 
         if($validator->passes()) {
-            $user->password = $input['password'];
-            $user->save();
+            $user->setPassword($input['password']);
+            $this->repository->persist($user);
 
             return Response::notification(
                 new Notification(Lang::get('oxygen/auth::messages.password.changed')),
@@ -229,7 +231,8 @@ class AuthController extends BasicCrudController {
 
     public function deleteForce() {
         try {
-            Auth::user()->forceDelete();
+            $user = Auth::user();
+            $this->repository->delete($user);
 
             return Response::notification(
                 new Notification(Lang::get('oxygen/auth::messages.account.terminated')),

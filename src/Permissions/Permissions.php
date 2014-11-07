@@ -6,7 +6,7 @@ use RuntimeException;
 
 use App;
 
-trait PermissionsTrait {
+trait Permissions {
 
     /**
      * Permissions Interface;
@@ -24,7 +24,7 @@ trait PermissionsTrait {
      */
 
     public function decodePermissions() {
-        $permissions = json_decode($this->group->permissions, true);
+        $permissions = $this->group->getPermissions();
 
         if(json_last_error() !== JSON_ERROR_NONE) {
             throw new RuntimeException("Could Not Decode User Permissions: " . json_last_error_msg());
