@@ -52,6 +52,14 @@ class User implements Validatable, UserInterface {
     protected $group;
 
     /**
+     * True if all fields should be fillable (only for Administrators)
+     *
+     * @var boolean
+     */
+
+    protected $allFillable;
+
+    /**
      * Returns a new preferences repository from the given preferences.
      *
      * @return Repository
@@ -62,6 +70,16 @@ class User implements Validatable, UserInterface {
         $repository = static::$jsonTransformer->toRepository($this->preferences);
         $repository->addFallbackRepository($this->getGroup()->getPreferences());
         return $repository;
+    }
+
+    /**
+     * Sets whether all fields should be fillable.
+     *
+     * @param boolean $fillable
+     */
+
+    public function setAllFillable($fillable) {
+        $this->allFillable = $fillable;
     }
 
     /**
@@ -100,7 +118,11 @@ class User implements Validatable, UserInterface {
      */
 
     protected function getFillableFields() {
-        return ['username', 'fullName', 'email'];
+        if($this->allFillable) {
+            return ['username', 'fullName', 'email', 'preferences', 'group'];
+        } else {
+            return ['username', 'fullName', 'email'];
+        }
     }
 
     /**

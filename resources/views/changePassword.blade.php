@@ -37,9 +37,9 @@
             'class' => 'Form--sendAjax Form--warnBeforeExit Form--submitOnKeydown'
         ]);
 
-        $oldPassword = new FieldMeta('old_password', FieldMeta::TYPE_PASSWORD, true);
+        $oldPassword = new FieldMeta('oldPassword', FieldMeta::TYPE_PASSWORD, true);
         $newPassword = new FieldMeta('password', FieldMeta::TYPE_PASSWORD, true);
-        $newPasswordConfirmation = new FieldMeta('password_confirmation', FieldMeta::TYPE_PASSWORD, true);
+        $newPasswordConfirmation = new FieldMeta('passwordConfirmation', FieldMeta::TYPE_PASSWORD, true);
 
         $fields = [
             new EditableField($oldPassword),

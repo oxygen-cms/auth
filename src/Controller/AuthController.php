@@ -202,9 +202,9 @@ class AuthController extends BasicCrudController {
         $validator = Validator::make(
             $input,
             [
-                'old_password' => ['required', 'hashes_to:' . $user->getPassword()],
-                'password' => ['required', 'confirmed'],
-                'password_confirmation' => ['required']
+                'oldPassword' => ['required', 'hashes_to:' . $user->getPassword()],
+                'password' => ['required', 'same:passwordConfirmation'],
+                'passwordConfirmation' => ['required']
             ]
         );
 
@@ -230,19 +230,13 @@ class AuthController extends BasicCrudController {
      */
 
     public function deleteForce() {
-        try {
-            $user = Auth::user();
-            $this->repository->delete($user);
+        $user = Auth::user();
+        $this->repository->delete($user);
 
-            return Response::notification(
-                new Notification(Lang::get('oxygen/auth::messages.account.terminated')),
-                ['redirect' => $this->blueprint->getRouteName('getLogin')]
-            );
-        } catch(Exception $e) {
-            return Response::notification(
-                new Notification(Lang::get('oxygen/crud::messages.account.terminateFailed'), Notification::FAILED)
-            );
-        }
+        return Response::notification(
+            new Notification(Lang::get('oxygen/auth::messages.account.terminated')),
+            ['redirect' => $this->blueprint->getRouteName('getLogin')]
+        );
     }
 
 }

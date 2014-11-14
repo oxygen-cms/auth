@@ -52,7 +52,7 @@ trait Preferences {
      * @return void
      */
 
-    public function setPreferences(Repository $repository) {
+    public function setPreferencesRepository(Repository $repository) {
         $this->preferencesRepository = $repository;
     }
 
@@ -63,7 +63,7 @@ trait Preferences {
      * @return $this
      */
 
-    public function setPreferencesAsJson($preferences) {
+    public function setPreferences($preferences) {
         $this->preferences = $preferences;
         $this->preferencesRepository = $this->createPreferencesRepository();
         return $this;

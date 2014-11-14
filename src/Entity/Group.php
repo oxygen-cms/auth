@@ -70,6 +70,16 @@ class Group implements Validatable {
     }
 
     /**
+     * Returns the fields that should be fillable.
+     *
+     * @return array
+     */
+
+    protected function getFillableFields() {
+        return ['name', 'description', 'preferences', 'permissions'];
+    }
+
+    /**
      * Returns the group's permissions.
      *
      * @return array

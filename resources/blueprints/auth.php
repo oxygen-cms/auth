@@ -160,8 +160,8 @@ Blueprint::make('Auth', function($blueprint) {
         [
             'name'      => 'createdAt',
             'label'     => 'Joined',
-            'presenter' => function(DateTime $value) {
-                return Carbon::createFromTimestamp($value->getTimestamp())->diffForHumans();
+            'presenter' => function($value) {
+                return with(new Carbon($value))->diffForHumans();
             }
         ]
     ]);
