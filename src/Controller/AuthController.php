@@ -57,7 +57,9 @@ class AuthController extends BasicCrudController {
      */
 
     public function getLogin() {
-        return View::make('oxygen/auth::login');
+        return View::make('oxygen/auth::login', [
+            'title' => Lang::get('oxygen/auth::ui.login.title')
+        ]);
     }
 
     /**
@@ -119,7 +121,9 @@ class AuthController extends BasicCrudController {
      */
 
     public function getLogoutSuccess() {
-        return View::make('oxygen/auth::logout');
+        return View::make('oxygen/auth::logout', [
+            'title' => Lang::get('oxygen/auth::ui.logout.title')
+        ]);
     }
 
     /**
@@ -133,7 +137,8 @@ class AuthController extends BasicCrudController {
         $user = Auth::user();
 
         return View::make('oxygen/auth::profile', [
-            'user' => $user
+            'user' => $user,
+            'title' => Lang::get('oxygen/auth::ui.profile.title')
         ]);
     }
 
@@ -148,7 +153,8 @@ class AuthController extends BasicCrudController {
         $user = Auth::user();
 
         return View::make('oxygen/auth::update', [
-            'user' => $user
+            'user' => $user,
+            'title' => Lang::get('oxygen/auth::ui.update.title')
         ]);
     }
 
@@ -185,7 +191,8 @@ class AuthController extends BasicCrudController {
         $user = Auth::user();
 
         return View::make('oxygen/auth::changePassword', [
-            'user' => $user
+            'user' => $user,
+            'title' => Lang::get('oxygen/auth::ui.changePassword.title')
         ]);
     }
 
