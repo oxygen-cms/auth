@@ -13,7 +13,7 @@ use Oxygen\Data\Behaviour\PrimaryKey;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Validation\Validatable;
-use Mitch\LaravelDoctrine\Traits\Authentication;
+use Oxygen\Data\Behaviour\Authentication;
 use Oxygen\Preferences\Repository;
 
 /**
@@ -135,16 +135,6 @@ class User implements Validatable, UserInterface {
     public function setPassword($password) {
         $this->password = Hash::make($password);
         return $this;
-    }
-
-    /**
-     * Hack around DoctrineUserProvider. Should be removed as soon as fix is available.
-     *
-     * @return string
-     */
-
-    public function getKeyName() {
-        return 'id';
     }
 
 }
