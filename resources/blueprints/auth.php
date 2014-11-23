@@ -149,19 +149,15 @@ Blueprint::make('Auth', function($blueprint) {
         [
             'name'      => 'group',
             'label'     => 'Group',
-            'presenter' => function($value, $model) {
-                if($model !== null) {
-                    return $model->getGroup()->getName();
-                } else {
-                    return $value;
-                }
+            'outputTransformer' => function($value, $model) {
+                return $value->getName();
             }
         ],
         [
             'name'      => 'createdAt',
             'label'     => 'Joined',
-            'presenter' => function($value) {
-                return with(new Carbon($value))->diffForHumans();
+            'outputTransformer' => function($value) {
+                return Carbon::instance($value)->diffForHumans();
             }
         ]
     ]);
