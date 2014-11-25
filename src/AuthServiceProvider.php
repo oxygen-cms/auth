@@ -29,11 +29,9 @@ class AuthServiceProvider extends ServiceProvider {
 		$this->app['router']->filter('oxygen.permissions', 'Oxygen\Auth\Filter\PermissionsFilter');
 
         $this->app['oxygen.blueprintManager']->loadDirectory(__DIR__ . '/../resources/blueprints');
-
         $this->app['oxygen.preferences']->loadDirectory(__DIR__ . '/../resources/preferences');
 
         $this->addNavigationItems();
-
         $this->addPreferencesToLayout();
 	}
 
@@ -48,17 +46,9 @@ class AuthServiceProvider extends ServiceProvider {
 		$blueprint = $blueprints->get('Auth');
 		$nav = $this->app['oxygen.navigation'];
 
-		$nav->add($blueprint->getToolbarItem('getInfo'), Navigation::SECONDARY);
-		$nav->add($blueprint->getToolbarItem('getPreferences'), Navigation::SECONDARY);
-		$nav->add($blueprint->getToolbarItem('postLogout'), Navigation::SECONDARY);
-
-		if($this->app['auth']->check()) {
-			$name = $this->app['auth']->user()->getFullName();
-			$this->app['oxygen.navigation']->order(Navigation::SECONDARY, [
-				'System' => ['marketplace.getHome', 'preferences.getView'],
-				$name => ['auth.getInfo', 'auth.getPreferences', 'auth.postLogout']
-			]);
-		}
+		$nav->add($blueprint->getToolbarItem('getInfo'));
+		$nav->add($blueprint->getToolbarItem('getPreferences'));
+		$nav->add($blueprint->getToolbarItem('postLogout'));
 	}
 
 	/**
