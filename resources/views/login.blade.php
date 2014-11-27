@@ -29,7 +29,7 @@
 
     {{ Form::open(array('route' => $blueprint->getRouteName('postLogin'), 'class' => 'Form--sendAjax Form--compact')) }}
 
-        <div class="Row--noLayout">
+        <div class="Row--visual">
             {{ Form::text('username', null, [
                 'autocomplete'  => 'off',
                 'placeholder'   => 'Username',
@@ -37,7 +37,7 @@
             ]) }}
         </div>
 
-        <div class="Row--noLayout">
+        <div class="Row--visual">
             {{ Form::input('password', 'password', null, [
                 'autocomplete'  => 'off',
                 'placeholder'   => 'Password',
@@ -45,7 +45,7 @@
             ]) }}
         </div>
 
-        <div class="Row--noLayout">
+        <div class="Row--visual">
             {{ Form::checkbox('remember', '1', '1', ['id' => 'remember']) }}
             {{ Form::label('remember', 'Remember Me', ['class' => 'Form-checkbox-label']) }}
         </div>
