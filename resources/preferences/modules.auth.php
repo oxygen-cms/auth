@@ -2,7 +2,7 @@
 
 use Oxygen\Preferences\Loader\ConfigLoader;
 
-Preferences::register('oxygen.auth', function($schema) {
+Preferences::register('modules.auth', function($schema) {
     $schema->setTitle('Authentication');
     $schema->setLoader(new ConfigLoader(App::make('config'), 'oxygen/auth::config'));
 
@@ -17,30 +17,9 @@ Preferences::register('oxygen.auth', function($schema) {
         return $options;
     };
 
-    $themes = [
-        'autumn' => 'Autumn Leaves',
-        'city' => 'City Street',
-        'clouds' => 'Clouds',
-        'coast' => 'Coast',
-        'speckles' => 'Speckles',
-        'trees' => 'Trees',
-        'waves' => 'Waves',
-        'yosemite' => 'Yosemite'
-    ];
-
     $schema->makeFields([
         '' => [
-            'Appearance' => [
-                [
-                    'name' => 'theme',
-                    'type' => 'select',
-                    'options' => $themes,
-                    'validationRules' => [
-                        'in:' . implode(',', array_keys($themes))
-                    ]
-                ],
-            ],
-            'Routes' => [
+            '' => [
                 [
                     'name' => 'dashboard',
                     'type' => 'select',
