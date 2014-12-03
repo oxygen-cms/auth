@@ -37,7 +37,7 @@ class UserLoader implements LoaderInterface {
         $this->repository = $repository;
         $this->user = $user;
     }
-s
+
     /**
      * Loads the preferences and returns the repository.
      *
