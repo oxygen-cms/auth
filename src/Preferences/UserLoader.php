@@ -30,14 +30,14 @@ class UserLoader implements LoaderInterface {
      * Constructs the UserLoader.
      *
      * @param UserRepositoryInterface $repository
-     * @param User                    $user User model
+     * @param callable                $user User model
      */
 
-    public function __construct(UserRepositoryInterface $repository, User $user = null) {
+    public function __construct(UserRepositoryInterface $repository, $user = null) {
         $this->repository = $repository;
         $this->user = $user;
     }
-
+s
     /**
      * Loads the preferences and returns the repository.
      *
@@ -45,6 +45,8 @@ class UserLoader implements LoaderInterface {
      */
 
     public function load() {
+        $this->loadUser();
+
         return $this->user->getPreferences();
     }
 
@@ -57,9 +59,24 @@ class UserLoader implements LoaderInterface {
      */
 
     public function store(Repository $preferences, Schema $schema) {
+        $this->loadUser();
+
         $this->user->setPreferencesRepository($preferences);
         $this->user->syncPreferences();
         $this->repository->persist($this->user);
+    }
+
+    /**
+     * Loads the user.
+     *
+     * @return User
+     */
+
+    protected function loadUser() {
+        if(!($this->user instanceof User)) {
+            $callable = $this->user;
+            $this->user = $callable();
+        }
     }
 
 }
