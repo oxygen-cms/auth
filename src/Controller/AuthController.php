@@ -81,7 +81,7 @@ class AuthController extends BasicCrudController {
                 new Notification(
                     Lang::get('oxygen/auth::messages.login.successful', ['name' => Auth::user()->getFullName()])
                 ),
-                ['redirect' => Config::get('oxygen/auth::dashboard')]
+                ['redirect' => Config::get('oxygen/auth::dashboard'), 'hardRedirect' => true]
             );
         } else {
             Event::fire('auth.login.failed', [Input::get('username')]);
@@ -110,7 +110,7 @@ class AuthController extends BasicCrudController {
 
         return Response::notification(
             new Notification(Lang::get('oxygen/auth::messages.logout.successful')),
-            ['redirect' => 'auth.getLogoutSuccess']
+            ['redirect' => 'auth.getLogoutSuccess', 'hardRedirect' => true] // redirect without SmoothState
         );
     }
 
