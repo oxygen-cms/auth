@@ -84,6 +84,20 @@ return [
     'account' => [
         'terminated'      => 'Your account has been terminated',
         'terminateFailed' => 'Account Termination Failed'
+    ],
+
+    /*
+    | ---------------
+    | Account
+    | ---------------
+    |
+    | Messages relating to the destruction of the user's account.
+    */
+
+    'reminder' => [
+        'email'      => [
+            'subject'    => 'Password Reminder'
+        ]
     ]
 
 ];

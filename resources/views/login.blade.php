@@ -48,10 +48,14 @@
         <div class="Row--visual">
             {{ Form::checkbox('remember', '1', '1', ['id' => 'remember']) }}
             {{ Form::label('remember', 'Remember Me', ['class' => 'Form-checkbox-label']) }}
+            <br><br>
+            <a href="{{{ URL::route(Blueprint::get('Reminders')->getRouteName('getRemind')) }}}">
+                @lang('oxygen/auth::ui.login.forgotPassword')
+            </a>
         </div>
 
         <div class="Row Form-footer">
-            <button type="submit" class="Button Button-color--blue Button--stretch awesome">
+            <button type="submit" class="Button Button-color--blue Button--stretch">
                 {{{ Lang::get('oxygen/auth::ui.login.submit') }}}
             </button>
         </div>

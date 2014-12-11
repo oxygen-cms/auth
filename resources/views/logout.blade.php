@@ -7,7 +7,7 @@
 
 @section('content')
 
-<div class="Login-background Login-background--blur"></div>
+<div class="Login-background Login-background--sharp"></div>
 
 <!-- =====================
             Logout
@@ -21,13 +21,14 @@
         </h2>
     </div>
 
-    <a href="{{{ URL::route($blueprint->getRouteName('getLogin')) }}}" class="Button Button-color--blue">
-        @lang('oxygen/auth::ui.logout.loginAgain')
-    </a>
-    <a href="{{{ URL::route(Config::get('oxygen/auth::home')) }}}" class="Button Button-color--grey">
-        @lang('oxygen/auth::ui.logout.toHome')
-    </a>
-
+    <div class="Row--visual">
+        <a href="{{{ URL::route($blueprint->getRouteName('getLogin')) }}}" class="Button Button-color--blue">
+            @lang('oxygen/auth::ui.logout.loginAgain')
+        </a>
+        <a href="{{{ URL::route(Config::get('oxygen/auth::home')) }}}" class="Button Button-color--grey">
+            @lang('oxygen/auth::ui.logout.toHome')
+        </a>
+    </div>
 </div>
 
 @stop

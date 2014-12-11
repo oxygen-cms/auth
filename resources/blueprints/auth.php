@@ -91,12 +91,6 @@ Blueprint::make('Auth', function($blueprint) {
     ]);
 
     $blueprint->makeAction([
-        'name' => 'postPreferences',
-        'pattern' => 'preferences',
-        'method' => 'POST'
-    ]);
-
-    $blueprint->makeAction([
         'name' => 'getChangePassword',
         'pattern' => 'changePassword'
     ]);

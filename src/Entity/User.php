@@ -3,6 +3,7 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\ORM\Mapping AS ORM;
+use Illuminate\Auth\Reminders\RemindableInterface;
 use Illuminate\Auth\UserInterface;
 use Illuminate\Support\Facades\Hash;
 use Oxygen\Auth\Permissions\Permissions;
@@ -22,7 +23,7 @@ use Oxygen\Preferences\Repository;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements Validatable, UserInterface {
+class User implements Validatable, UserInterface, RemindableInterface {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use Accessors, Fillable;
