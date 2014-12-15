@@ -20,7 +20,6 @@ use Validator;
 use Oxygen\Crud\Controller\BasicCrudController;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Core\Blueprint\Manager as BlueprintManager;
-use Oxygen\Preferences\Transformer\InputTransformer;
 
 class AuthController extends BasicCrudController {
 
