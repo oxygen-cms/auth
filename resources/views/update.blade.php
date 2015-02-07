@@ -4,8 +4,7 @@
 
 <?php
 
-    use Oxygen\Core\Form\Field as FieldMeta;
-    use Oxygen\Core\Html\Header\Header;
+use Oxygen\Core\Html\Form\Label;use Oxygen\Core\Html\Form\Row;use Oxygen\Core\Html\Header\Header;
     use Oxygen\Core\Html\Form\EditableField;
     use Oxygen\Core\Html\Form\Footer;
 
@@ -42,8 +41,13 @@
         );
 
         foreach($blueprint->getFields() as $field) {
+            if(!$field->editable) {
+                continue;
+            }
             $field = EditableField::fromEntity($field, $user);
-            echo $field->render();
+            $label = new Label($field->getMeta());
+            $row = new Row([$label, $field]);
+            echo $row->render();
         }
 
         $footer = new Footer([

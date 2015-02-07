@@ -4,8 +4,8 @@
 
 <?php
 
-    use Oxygen\Core\Form\Field as FieldMeta;
-    use Oxygen\Core\Html\Header\Header;
+    use Oxygen\Core\Form\FieldMetadata as FieldMeta;
+use Oxygen\Core\Html\Form\Label;use Oxygen\Core\Html\Form\Row;use Oxygen\Core\Html\Header\Header;
     use Oxygen\Core\Html\Form\EditableField;
     use Oxygen\Core\Html\Form\Footer;
 
@@ -37,18 +37,20 @@
             'class' => 'Form--sendAjax Form--warnBeforeExit Form--submitOnKeydown'
         ]);
 
-        $oldPassword = new FieldMeta('oldPassword', FieldMeta::TYPE_PASSWORD, true);
-        $newPassword = new FieldMeta('password', FieldMeta::TYPE_PASSWORD, true);
-        $newPasswordConfirmation = new FieldMeta('passwordConfirmation', FieldMeta::TYPE_PASSWORD, true);
-
         $fields = [
-            new EditableField($oldPassword),
-            new EditableField($newPassword),
-            new EditableField($newPasswordConfirmation)
+            new FieldMeta('oldPassword', FieldMeta::TYPE_PASSWORD, true),
+            new FieldMeta('password', FieldMeta::TYPE_PASSWORD, true),
+            new FieldMeta('passwordConfirmation', FieldMeta::TYPE_PASSWORD, true)
         ];
 
         foreach($fields as $field) {
-            echo $field->render();
+            if(!$field->editable) {
+                continue;
+            }
+            $field = new EditableField($field);
+            $label = new Label($field->getMeta());
+            $row = new Row([$label, $field]);
+            echo $row->render();
         }
 
         $footer = new Footer([
