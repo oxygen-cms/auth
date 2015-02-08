@@ -1,10 +1,10 @@
 <?php
 
-    use Carbon\Carbon;
-    use Oxygen\Core\Action\Factory\ActionFactory;
+use Carbon\Carbon;
+use Oxygen\Core\Action\Factory\ActionFactory;
 use Oxygen\Core\Action\Group;
+use Oxygen\Core\Form\Type\CustomType;
 use Oxygen\Core\Html\Dialog\Dialog;
-use Oxygen\Crud\BlueprintTrait\BasicCrudTrait;
 
 Blueprint::make('Auth', function($blueprint) {
     $blueprint->setController('Oxygen\Auth\Controller\AuthController');
@@ -123,36 +123,44 @@ Blueprint::make('Auth', function($blueprint) {
         [
             'name'      => 'username',
             'label'     => 'Username',
-            'editable'  => true,
-            'validationRules' => [ 'required', 'min:4', 'max:50', 'alpha_num', 'unique:{{ table }}' ]
+            'editable'  => true
         ],
         [
             'name'      => 'fullName',
             'label'     => 'Full Name',
             'type'      => 'text',
-            'editable'  => true,
-            'validationRules' => [ 'required', 'min:3', 'max:100', 'name' ]
+            'editable'  => true
         ],
         [
             'name'      => 'email',
             'label'     => 'Email Address',
             'type'      => 'email',
-            'editable'  => true,
-            'validationRules' => [ 'required', 'email', 'max:100' ]
+            'editable'  => true
         ],
         [
             'name'      => 'group',
             'label'     => 'Group',
-            'outputTransformer' => function($value, $model) {
-                return $value->getName();
-            }
+            'typeInstance' => new CustomType(
+                function($metadata, $value) {
+                    return $value;
+                },
+                function($metadata, $value) {
+                    return $value->getName();
+                }
+            )
         ],
         [
             'name'      => 'createdAt',
             'label'     => 'Joined',
-            'outputTransformer' => function($value) {
-                return Carbon::instance($value)->diffForHumans();
-            }
+            'type'      => 'datetime',
+            'typeInstance' => new CustomType(
+                function($metadata, $value) {
+                    return $value;
+                },
+                function($metadata, $value) {
+                    return Carbon::instance($value)->diffForHumans();
+                }
+            )
         ]
     ]);
 });

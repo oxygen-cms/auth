@@ -6,9 +6,9 @@
 
 use Oxygen\Core\Html\Form\Label;use Oxygen\Core\Html\Form\Row;use Oxygen\Core\Html\Header\Header;
     use Oxygen\Core\Html\Form\EditableField;
-    use Oxygen\Core\Html\Form\Footer;
+    use Oxygen\Core\Html\Form\Footer;use Oxygen\Core\Html\Toolbar\ButtonToolbarItem;use Oxygen\Core\Html\Toolbar\SubmitToolbarItem;
 
-    $header = Header::fromBlueprint(
+$header = Header::fromBlueprint(
         $blueprint,
         Lang::get('oxygen/auth::ui.update.title')
     );
@@ -50,16 +50,11 @@ use Oxygen\Core\Html\Form\Label;use Oxygen\Core\Html\Form\Row;use Oxygen\Core\Ht
             echo $row->render();
         }
 
-        $footer = new Footer([
-            [
-                'route' => $blueprint->getRouteName('getInfo'),
-                'label' => Lang::get('oxygen/auth::ui.update.close')
-            ],
-            [
-                'type' => 'submit',
-                'label' => Lang::get('oxygen/auth::ui.update.save')
-            ]
+        $footer = new Row([
+            new ButtonToolbarItem(Lang::get('oxygen/auth::ui.update.close'), $blueprint->getAction('getInfo')),
+            new SubmitToolbarItem(Lang::get('oxygen/auth::ui.update.save'))
         ]);
+        $footer->isFooter = true;
 
         echo $footer->render();
 

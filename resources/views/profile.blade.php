@@ -5,7 +5,7 @@
 <?php
 
     use Oxygen\Core\Action\Action;
-    use Oxygen\Core\Html\Header\Header;
+use Oxygen\Core\Html\Form\Label;use Oxygen\Core\Html\Form\Row;use Oxygen\Core\Html\Header\Header;
     use Oxygen\Core\Html\Form\StaticField;
     use Oxygen\Core\Html\Toolbar\ButtonToolbarItem;
 
@@ -42,7 +42,8 @@
     <?php
         foreach($blueprint->getFields() as $field) {
             $field = StaticField::fromEntity($field, $user, true);
-            echo $field->render();
+            $row = new Row([new Label($field->getMeta()), $field]);
+            echo $row->render();
         }
     ?>
 </div>
