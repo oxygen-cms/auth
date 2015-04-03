@@ -29,7 +29,7 @@ class User implements Validatable, UserInterface, RemindableInterface {
     use Accessors, Fillable;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", unique=true)
      */
 
     protected $username;
@@ -45,7 +45,7 @@ class User implements Validatable, UserInterface, RemindableInterface {
      */
 
     protected $email;
-    
+
     /**
      * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade="persist")
      */
@@ -69,7 +69,9 @@ class User implements Validatable, UserInterface, RemindableInterface {
     public function createPreferencesRepository() {
         $this->createJsonTransformer();
         $repository = static::$jsonTransformer->toRepository($this->preferences);
-        $repository->addFallbackRepository($this->getGroup()->getPreferences());
+        if($this->getGroup() != null) {
+            $repository->addFallbackRepository($this->getGroup()->getPreferences());
+        }
         return $repository;
     }
 
@@ -90,13 +92,16 @@ class User implements Validatable, UserInterface, RemindableInterface {
      */
 
     public function getValidationRules() {
+        $class = get_class($this);
+        $id = $this->getId();
+
         return [
             'username' => [
                 'required',
                 'min:4',
                 'max:50',
                 'alpha_num',
-                'unique:' . __CLASS__ . ',username,' . $this->getId() . ',id,email,!=,foo@baz.dof'
+                'unique:' . "$class,username,$id"
             ],
             'fullName' => [
                 'required',
