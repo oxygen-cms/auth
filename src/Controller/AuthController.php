@@ -241,7 +241,7 @@ class AuthController extends BasicCrudController {
 
         return Response::notification(
             new Notification(Lang::get('oxygen/auth::messages.account.terminated')),
-            ['redirect' => $this->blueprint->getRouteName('getLogin')]
+            ['redirect' => $this->blueprint->getRouteName('getLogin'), 'hardRedirect' => true]
         );
     }
 
