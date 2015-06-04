@@ -10,7 +10,6 @@ interface PermissionsInterface {
      *
      * @return bool     if the implementation needs permissions
      */
-
     public function needsPermissions();
 
     /**
@@ -19,7 +18,6 @@ interface PermissionsInterface {
      *
      * @param array     $permissions
      */
-
     public function setPermissions(array $permissions);
 
     /**
@@ -28,7 +26,6 @@ interface PermissionsInterface {
      * @param string    $key the permissions key in dot notation
      * @return bool     if the permission is true or false
      */
-
     public function hasPermissions($key);
 
 }

@@ -41,7 +41,6 @@ class PermissionsFilter {
      * @param Translator $lang Translator instance
      * @param Response $response Response facade
      */
-
     public function __construct(AuthManager $auth, Translator $lang, Response $response) {
         $this->auth = $auth;
         $this->lang = $lang;
@@ -55,7 +54,6 @@ class PermissionsFilter {
      *
      * @return Response
      */
-
     public function filter($route, $request, $value) {
         if(!$this->auth->user()->hasPermissions($value)) {
             $notification = new Notification(

@@ -29,7 +29,6 @@ class AuthController extends BasicCrudController {
      * @param UserRepositoryInterface $repository
      * @param BlueprintManager        $manager
      */
-
     public function __construct(UserRepositoryInterface $repository, BlueprintManager $manager) {
         parent::__construct($repository, $manager, 'Auth');
     }
@@ -40,7 +39,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function getCheck() {
         if(Auth::check()) {
             return Redirect::intended(URL::route(Config::get('oxygen/auth::dashboard')));
@@ -54,7 +52,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function getLogin() {
         return View::make('oxygen/auth::login', [
             'title' => Lang::get('oxygen/auth::ui.login.title')
@@ -66,7 +63,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function postLogin() {
         $remember = Input::get('remember') === '1' ? true : false;
 
@@ -99,7 +95,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function postLogout() {
         $user = Auth::user();
 
@@ -118,7 +113,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function getLogoutSuccess() {
         return View::make('oxygen/auth::logout', [
             'title' => Lang::get('oxygen/auth::ui.logout.title')
@@ -131,7 +125,6 @@ class AuthController extends BasicCrudController {
      * @param mixed $foo useless param
      * @return Response
      */
-
     public function getInfo($foo = null) {
         $user = Auth::user();
 
@@ -147,7 +140,6 @@ class AuthController extends BasicCrudController {
      * @param mixed $foo useless param
      * @return Response
      */
-
     public function getUpdate($foo = null) {
         $user = Auth::user();
 
@@ -163,7 +155,6 @@ class AuthController extends BasicCrudController {
      * @param mixed $foo useless param
      * @return Response
      */
-
     public function putUpdate($foo = null) {
         $user = Auth::user();
 
@@ -175,7 +166,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function getPreferences() {
         return Redirect::route('preferences.getView', ['user']);
     }
@@ -185,7 +175,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function getChangePassword() {
         $user = Auth::user();
 
@@ -200,7 +189,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function postChangePassword() {
         $user = Auth::user();
         $input = Input::all();
@@ -234,7 +222,6 @@ class AuthController extends BasicCrudController {
      *
      * @return Response
      */
-
     public function deleteForce() {
         $user = Auth::user();
         $this->repository->delete($user);

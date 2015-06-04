@@ -26,7 +26,6 @@ class SimplePermissionsSystem implements PermissionsInterface {
      *
      * @return bool     if the implementation needs permissions
      */
-
     public function needsPermissions() {
         return ($this->permissions === null);
     }
@@ -37,7 +36,6 @@ class SimplePermissionsSystem implements PermissionsInterface {
      *
      * @param array $permissions
      */
-
     public function setPermissions(array $permissions) {
         $this->permissions = $permissions;
     }
@@ -48,7 +46,6 @@ class SimplePermissionsSystem implements PermissionsInterface {
      * @param string $key the permissions key in dot notation
      * @return boolean if the permission is true or false
      */
-
     public function hasPermissions($key) {
         $keyParts = explode('.', $key);
 

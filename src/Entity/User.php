@@ -65,7 +65,6 @@ class User implements Validatable, UserInterface, RemindableInterface {
      *
      * @return Repository
      */
-
     public function createPreferencesRepository() {
         $this->createJsonTransformer();
         $repository = static::$jsonTransformer->toRepository($this->preferences);
@@ -80,7 +79,6 @@ class User implements Validatable, UserInterface, RemindableInterface {
      *
      * @param boolean $fillable
      */
-
     public function setAllFillable($fillable) {
         $this->allFillable = $fillable;
     }
@@ -90,7 +88,6 @@ class User implements Validatable, UserInterface, RemindableInterface {
      *
      * @return array
      */
-
     public function getValidationRules() {
         $class = get_class($this);
         $id = $this->getId();
@@ -137,7 +134,6 @@ class User implements Validatable, UserInterface, RemindableInterface {
      * @param string $password
      * @return $this
      */
-
     public function setPassword($password) {
         $this->password = Hash::make($password);
         return $this;

@@ -49,7 +49,6 @@ class Group implements Validatable {
     /**
      * Constructs the Group.
      */
-
     public function __construct() {
         $this->users = new ArrayCollection();
     }
@@ -59,7 +58,6 @@ class Group implements Validatable {
      *
      * @return array
      */
-
     public function getValidationRules() {
         return [
             'name' => [
@@ -84,7 +82,6 @@ class Group implements Validatable {
      *
      * @return array
      */
-
     public function getPermissions() {
         return json_decode($this->permissions, true);
     }
@@ -95,7 +92,6 @@ class Group implements Validatable {
      * @param  array|string $permissions
      * @return $this
      */
-
     public function setPermissions($permissions) {
         $this->permissions = is_string($permissions) ? $permissions : json_encode($permissions, JSON_PRETTY_PRINT);
         return $this;

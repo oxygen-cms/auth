@@ -32,7 +32,6 @@ class UserLoader implements LoaderInterface {
      * @param UserRepositoryInterface $repository
      * @param User                    $user User model
      */
-
     public function __construct(UserRepositoryInterface $repository, User $user = null) {
         $this->repository = $repository;
         $this->user = $user;
@@ -43,7 +42,6 @@ class UserLoader implements LoaderInterface {
      *
      * @return Repository
      */
-
     public function load() {
         return $this->user->getPreferences();
     }
@@ -55,7 +53,6 @@ class UserLoader implements LoaderInterface {
      * @param Schema     $schema
      * @return void
      */
-
     public function store(Repository $preferences, Schema $schema) {
         $this->user->setPreferencesRepository($preferences);
         $this->user->syncPreferences();

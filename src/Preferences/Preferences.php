@@ -36,7 +36,6 @@ trait Preferences {
      *
      * @return Repository
      */
-
     public function getPreferences() {
         if($this->preferencesRepository === null) {
             $this->preferencesRepository = $this->createPreferencesRepository();
@@ -51,7 +50,6 @@ trait Preferences {
      * @param Repository $repository
      * @return void
      */
-
     public function setPreferencesRepository(Repository $repository) {
         $this->preferencesRepository = $repository;
     }
@@ -62,7 +60,6 @@ trait Preferences {
      * @param string $preferences
      * @return $this
      */
-
     public function setPreferences($preferences) {
         $this->preferences = $preferences;
         $this->preferencesRepository = $this->createPreferencesRepository();
@@ -74,7 +71,6 @@ trait Preferences {
      *
      * @return Repository
      */
-
     public function createPreferencesRepository() {
         $this->createJsonTransformer();
         return static::$jsonTransformer->toRepository($this->preferences);
@@ -85,7 +81,6 @@ trait Preferences {
      *
      * @return void
      */
-
     public function syncPreferences() {
         $this->createJsonTransformer();
         $this->preferences = static::$jsonTransformer->fromRepository($this->getPreferences(), true);

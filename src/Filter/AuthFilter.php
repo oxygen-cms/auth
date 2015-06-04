@@ -61,7 +61,6 @@ class AuthFilter {
      * @param Translator        $lang       Translator instance
      * @param UrlGenerator      $url        UrlGenerator instance
      */
-
     public function __construct(AuthManager $auth, Config $config, Response $response, Translator $lang, UrlGenerator $url) {
         $this->auth     = $auth;
         $this->config   = $config;
@@ -76,7 +75,6 @@ class AuthFilter {
      *
      * @return Response
      */
-
     public function auth() {
         if($this->auth->guest()) {
             return $this->response->notification(
@@ -92,7 +90,6 @@ class AuthFilter {
      *
      * @return Response
      */
-
     public function guest() {
         if($this->auth->check()) {
             return $this->response->notification(

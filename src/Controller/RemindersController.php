@@ -25,7 +25,6 @@ class RemindersController extends BlueprintController {
      * @param UserRepositoryInterface  $users
      * @param BlueprintManager         $manager
      */
-
     public function __construct(UserRepositoryInterface $users, BlueprintManager $manager) {
         parent::__construct($manager, 'Reminders');
         $this->users = $users;
@@ -36,7 +35,6 @@ class RemindersController extends BlueprintController {
      *
      * @return Response
      */
-
     public function getRemind() {
         return View::make('oxygen/auth::reminders.remind', [
             'title' => Lang::get('oxygen/auth::ui.remind.title')
@@ -48,7 +46,6 @@ class RemindersController extends BlueprintController {
      *
      * @return Response
      */
-
     public function postRemind() {
         $result = Password::remind(Input::only('email'), function($message) {
             $message->subject(Lang::get('oxygen/auth::messages.reminder.email.subject'));
@@ -66,7 +63,6 @@ class RemindersController extends BlueprintController {
      *
      * @return Response
      */
-
     public function getReset() {
         if(!Input::has('token')) {
             App::abort(404);
@@ -82,7 +78,6 @@ class RemindersController extends BlueprintController {
      *
      * @return Response
      */
-
     public function postReset() {
         $credentials = Input::only(
             'email', 'password', 'password_confirmation', 'token'

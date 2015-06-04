@@ -22,7 +22,6 @@ trait Permissions {
      *
      * @return array
      */
-
     public function decodePermissions() {
         $permissions = $this->group->getPermissions();
 
@@ -39,7 +38,6 @@ trait Permissions {
      * @param string $key
      * @return boolean
      */
-
     public function hasPermissions($key) {
         if($this->permissionsInterface === null) {
             $this->permissionsInterface = App::make('Oxygen\Auth\Permissions\PermissionsInterface');
