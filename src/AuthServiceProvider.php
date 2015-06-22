@@ -2,11 +2,21 @@
 
 namespace Oxygen\Auth;
 
+use Illuminate\Contracts\Http\Kernel;
+use Oxygen\Auth\Middleware\Authenticate;
+use Oxygen\Auth\Middleware\Permissions;
+use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
+use Oxygen\Auth\Permissions\PermissionsInterface;
+use Oxygen\Auth\Permissions\SimplePermissionsSystem;
+use Oxygen\Auth\Repository\DoctrineGroupRepository;
+use Oxygen\Auth\Repository\DoctrineUserRepository;
+use Oxygen\Auth\Repository\GroupRepositoryInterface;
+use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Core\Html\Navigation\Navigation;
-use Oxygen\Core\Support\ServiceProvider;
+use Oxygen\Data\BaseServiceProvider;
 use Oxygen\Preferences\Transformer\JavascriptTransformer;
 
-class AuthServiceProvider extends ServiceProvider {
+class AuthServiceProvider extends BaseServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
@@ -21,12 +31,21 @@ class AuthServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot() {
-		$this->package('oxygen/auth', 'oxygen/auth', __DIR__ . '/../resources');
-        $this->entities(__DIR__ . '/Entity');
+		$this->loadViewsFrom(__DIR__ . '/../resources/views', 'oxygen/auth');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
+        $this->mergeConfigFrom(__DIR__ . '/../resources/config/config.php', 'oxygen.auth');
 
-		$this->app['router']->filter('oxygen.auth', 'Oxygen\Auth\Filter\AuthFilter@auth');
-		$this->app['router']->filter('oxygen.guest', 'Oxygen\Auth\Filter\AuthFilter@guest');
-		$this->app['router']->filter('oxygen.permissions', 'Oxygen\Auth\Filter\PermissionsFilter');
+        $this->publishes([
+            __DIR__ . '/../resources/config/config.php' => config_path('oxygen/auth.php'),
+            __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
+            __DIR__ . '/../resources/views' => base_path('resources/views/vendor/oxygen/auth')
+        ]);
+
+        $this->loadEntitiesFrom(__DIR__ . '/Entity');
+
+		$this->app['router']->middleware('oxygen.auth', Authenticate::class);
+		$this->app['router']->middleware('oxygen.guest', RedirectIfAuthenticated::class);
+		$this->app['router']->middleware('oxygen.permissions', Permissions::class);
 
         $this->app['oxygen.blueprintManager']->loadDirectory(__DIR__ . '/../resources/blueprints');
         $this->app['oxygen.preferences']->loadDirectory(__DIR__ . '/../resources/preferences');
@@ -74,11 +93,11 @@ class AuthServiceProvider extends ServiceProvider {
 
 	public function register() {
 		// Permissions System
-        $this->app->bind('Oxygen\Auth\Permissions\PermissionsInterface', 'Oxygen\Auth\Permissions\SimplePermissionsSystem');
+        $this->app->bind(PermissionsInterface::class, SimplePermissionsSystem::class);
 
         // Repositories
-        $this->app->bind('Oxygen\Auth\Repository\UserRepositoryInterface', 'Oxygen\Auth\Repository\DoctrineUserRepository');
-        $this->app->bind('Oxygen\Auth\Repository\GroupRepositoryInterface', 'Oxygen\Auth\Repository\DoctrineGroupRepository');
+        $this->app->bind(UserRepositoryInterface::class, DoctrineUserRepository::class);
+        $this->app->bind(GroupRepositoryInterface::class, DoctrineGroupRepository::class);
 	}
 
 	/**
@@ -89,7 +108,9 @@ class AuthServiceProvider extends ServiceProvider {
 
 	public function provides() {
 		return [
-			'Oxygen\Auth\Permissions\PermissionsInterface'
+			PermissionsInterface::class,
+            UserRepositoryInterface::class,
+            GroupRepositoryInterface::class
 		];
 	}
 
