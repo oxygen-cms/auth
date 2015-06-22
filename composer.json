@@ -15,10 +15,10 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "oxygen/core": "~0.2.0",
-        "oxygen/data": "~0.3.0",
-        "oxygen/preferences": "~0.1.0",
-        "illuminate/support": "4.2.*"
+        "oxygen/core": "dev-master",
+        "oxygen/data": "dev-master",
+        "oxygen/preferences": "dev-master",
+        "illuminate/support": "~5.1.0"
     },
     "autoload": {
         "psr-4": {
@@ -35,7 +35,7 @@
             {
                 "name": "Auth",
                 "class": "Oxygen\\Auth\\AuthServiceProvider",
-                "description": "Authorisation & User Profile"
+                "description": "Authorisation Framework"
             }
         ]
     }

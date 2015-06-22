@@ -12,7 +12,6 @@ use Oxygen\Auth\Repository\DoctrineGroupRepository;
 use Oxygen\Auth\Repository\DoctrineUserRepository;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
-use Oxygen\Core\Html\Navigation\Navigation;
 use Oxygen\Data\BaseServiceProvider;
 use Oxygen\Preferences\Transformer\JavascriptTransformer;
 
@@ -48,41 +47,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 
         $this->app['oxygen.blueprintManager']->loadDirectory(__DIR__ . '/../resources/blueprints');
         $this->app['oxygen.preferences']->loadDirectory(__DIR__ . '/../resources/preferences');
-
-        $this->addNavigationItems();
-        $this->addPreferencesToLayout();
 	}
-
-	/**
-	 * Adds items the the admin navigation.
-	 *
-	 * @return void
-	 */
-
-	public function addNavigationItems() {
-		$blueprints = $this->app['oxygen.blueprintManager'];
-		$blueprint = $blueprints->get('Auth');
-		$nav = $this->app['oxygen.navigation'];
-
-		$nav->add($blueprint->getToolbarItem('getInfo'));
-		$nav->add($blueprint->getToolbarItem('getPreferences'));
-		$nav->add($blueprint->getToolbarItem('postLogout'));
-	}
-
-	/**
-     * Adds some embedded Javascript code that contains the user's preferences.
-     *
-     * @return void
-     */
-
-    protected function addPreferencesToLayout() {
-        $this->app['events']->listen('oxygen.layout.body.after', function() {
-		    if($this->app['auth']->check()) {
-		        $javascriptTransformer = new JavascriptTransformer();
-		        echo $javascriptTransformer->fromRepository($this->app['auth']->user()->getPreferences(), 'user');
-		    }
-        });
-    }
 
 	/**
 	 * Register the service provider.
