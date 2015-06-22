@@ -32,11 +32,10 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 * @return void
 	 */
 	public function boot() {
-		$this->loadViewsFrom(__DIR__ . '/../resources/views', 'oxygen/auth');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
         $this->loadEntitiesFrom(__DIR__ . '/Entity');
         $this->mergeConfigFrom(__DIR__ . '/../resources/config/config.php', 'oxygen.auth');
-
+        
         $this->publishes([
             __DIR__ . '/../resources/config/config.php' => config_path('oxygen/auth.php'),
             __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
@@ -46,9 +45,6 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->app['router']->middleware('oxygen.auth', Authenticate::class);
 		$this->app['router']->middleware('oxygen.guest', RedirectIfAuthenticated::class);
 		$this->app['router']->middleware('oxygen.permissions', Permissions::class);
-
-        $this->app[BlueprintManager::class]->loadDirectory(__DIR__ . '/../resources/blueprints');
-        $this->app[PreferencesManager::class]->loadDirectory(__DIR__ . '/../resources/preferences');
 	}
 
 	/**
