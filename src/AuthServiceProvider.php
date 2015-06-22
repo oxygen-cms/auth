@@ -12,7 +12,9 @@ use Oxygen\Auth\Repository\DoctrineGroupRepository;
 use Oxygen\Auth\Repository\DoctrineUserRepository;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
+use Oxygen\Core\Blueprint\BlueprintManager;
 use Oxygen\Data\BaseServiceProvider;
+use Oxygen\Preferences\PreferencesManager;
 use Oxygen\Preferences\Transformer\JavascriptTransformer;
 
 class AuthServiceProvider extends BaseServiceProvider {
@@ -45,8 +47,8 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->app['router']->middleware('oxygen.guest', RedirectIfAuthenticated::class);
 		$this->app['router']->middleware('oxygen.permissions', Permissions::class);
 
-        $this->app['oxygen.blueprintManager']->loadDirectory(__DIR__ . '/../resources/blueprints');
-        $this->app['oxygen.preferences']->loadDirectory(__DIR__ . '/../resources/preferences');
+        $this->app[BlueprintManager::class]->loadDirectory(__DIR__ . '/../resources/blueprints');
+        $this->app[PreferencesManager::class]->loadDirectory(__DIR__ . '/../resources/preferences');
 	}
 
 	/**
