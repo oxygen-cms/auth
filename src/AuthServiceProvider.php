@@ -35,7 +35,7 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
         $this->loadEntitiesFrom(__DIR__ . '/Entity');
         $this->mergeConfigFrom(__DIR__ . '/../resources/config/config.php', 'oxygen.auth');
-        
+
         $this->publishes([
             __DIR__ . '/../resources/config/config.php' => config_path('oxygen/auth.php'),
             __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
