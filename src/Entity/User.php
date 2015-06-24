@@ -3,8 +3,8 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\ORM\Mapping AS ORM;
-use Illuminate\Auth\Reminders\RemindableInterface;
-use Illuminate\Auth\UserInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Preferences\Preferences;
@@ -23,7 +23,7 @@ use Oxygen\Preferences\Repository;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements Validatable, UserInterface, RemindableInterface {
+class User implements Validatable, Authenticatable, CanResetPassword {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use Accessors, Fillable;
@@ -139,4 +139,12 @@ class User implements Validatable, UserInterface, RemindableInterface {
         return $this;
     }
 
+    /**
+     * Get the e-mail address where password reset links are sent.
+     *
+     * @return string
+     */
+    public function getEmailForPasswordReset() {
+        return $this->email;
+    }
 }
