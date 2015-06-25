@@ -13,21 +13,44 @@ use Oxygen\Preferences\PreferencesManager;
 class RedirectIfAuthenticated {
 
     /**
+     * @var \Illuminate\Contracts\Auth\Guard
+     */
+    private $auth;
+
+    /**
+     * @var \Oxygen\Core\Contracts\Routing\ResponseFactory
+     */
+    private $response;
+
+    /**
+     * @var \Illuminate\Translation\Translator
+     */
+    private $lang;
+
+    /**
+     * @var \Oxygen\Preferences\PreferencesManager
+     */
+    private $preferences;
+
+    public function __construct(Guard $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
+        $this->auth = $auth;
+        $this->response = $response;
+        $this->lang = $lang;
+        $this->preferences = $preferences;
+    }
+
+    /**
      * Run the request filter.
      *
      * @param  \Illuminate\Http\Request                       $request
      * @param  \Closure                                       $next
-     * @param  \Illuminate\Contracts\Auth\Guard               $auth
-     * @param  \Oxygen\Core\Contracts\Routing\ResponseFactory $response
-     * @param  \Illuminate\Translation\Translator             $lang
-     * @param  \Oxygen\Preferences\PreferencesManager         $preferences
      * @return mixed
      */
-    public function handle($request, Closure $next, Guard $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
-        if($auth->check()) {
-            return $response->notification(
-                new Notification($lang->get('oxygen/auth::messages.filter.alreadyLoggedIn')),
-                ['redirect' => $preferences->get('modules.auth::dashboard')]
+    public function handle($request, Closure $next) {
+        if($this->auth->check()) {
+            return $this->response->notification(
+                new Notification($this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn')),
+                ['redirect' => $this->preferences->get('modules.auth::dashboard')]
             );
         }
 
