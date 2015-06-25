@@ -11,7 +11,7 @@ trait Permissions {
     /**
      * Permissions Interface;
      *
-     * @var Oxygen\Auth\Permissions\PermissionsInterface
+     * @var \Oxygen\Auth\Permissions\PermissionsInterface
      */
 
     protected $permissionsInterface;
@@ -40,7 +40,7 @@ trait Permissions {
      */
     public function hasPermissions($key) {
         if($this->permissionsInterface === null) {
-            $this->permissionsInterface = App::make('Oxygen\Auth\Permissions\PermissionsInterface');
+            $this->permissionsInterface = App::make(PermissionsInterface::class);
         }
 
         if($this->permissionsInterface->needsPermissions()) {
