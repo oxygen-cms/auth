@@ -64,7 +64,7 @@ class RedirectIfAuthenticated {
         if($this->auth->check()) {
             return $this->response->notification(
                 new Notification($this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn')),
-                ['redirect' => $this->config->get('oxygen/auth::dashboard')]
+                ['redirect' => Preferences::get('modules.auth::dashboard')]
             );
         }
 

@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Core\Translation\Translator;
+use Preferences;
 
 class Permissions {
 
@@ -61,7 +62,7 @@ class Permissions {
                 $this->lang->get('oxygen/auth::messages.permissions.noPermissions', ['permission' => $permission]),
                 Notification::FAILED
             );
-            return $this->response->notification($notification, ['redirect' => 'dashboard.main']);
+            return $this->response->notification($notification, ['redirect' => Preferences::get('modules.auth::dashboard')]);
         }
 
         return $next($request);
