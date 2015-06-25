@@ -11,53 +11,19 @@ use Oxygen\Core\Http\Notification;
 class Authenticate {
 
     /**
-     * Authentication dependency.
-     *
-     * @var Guard
-     */
-
-    protected $auth;
-
-    /**
-     * Response factory
-     *
-     * @var ResponseFactory
-     */
-
-    protected $response;
-
-    /**
-     * Translator dependency
-     *
-     * @var Translator
-     */
-
-    protected $lang;
-
-    /**
-     * Constructs the Authentication middleware
-     *
-     * @param Guard             $auth       AuthManager instance
-     * @param ResponseFactory   $response   Response facade
-     * @param Translator        $lang       Translator instance
-     */
-    public function __construct(Guard $auth, ResponseFactory $response, Translator $lang) {
-        $this->auth     = $auth;
-        $this->response = $response;
-        $this->lang     = $lang;
-    }
-
-    /**
      * Run the request filter.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param \Illuminate\Http\Request                       $request
+     * @param \Closure                                       $next
+     * @param \Illuminate\Contracts\Auth\Guard               $auth
+     * @param \Oxygen\Core\Contracts\Routing\ResponseFactory $response
+     * @param \Illuminate\Translation\Translator             $lang
      * @return mixed
      */
-    public function handle($request, Closure $next) {
-        if($this->auth->guest()) {
-            return $this->response->notification(
-                new Notification($this->lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED),
+    public function handle($request, Closure $next, Guard $auth, ResponseFactory $response, Translator $lang) {
+        if($auth->guest()) {
+            return $response->notification(
+                new Notification($lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED),
                 ['redirect' => 'auth.getLogin']
             );
         }
