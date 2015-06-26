@@ -50,10 +50,9 @@ class UserLoader implements LoaderInterface {
      * Stores the preferences.
      *
      * @param Repository $preferences
-     * @param Schema     $schema
      * @return void
      */
-    public function store(Repository $preferences, Schema $schema) {
+    public function store(Repository $preferences) {
         $this->user->setPreferencesRepository($preferences);
         $this->user->syncPreferences();
         $this->repository->persist($this->user);
