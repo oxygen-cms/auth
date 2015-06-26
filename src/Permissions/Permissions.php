@@ -13,7 +13,6 @@ trait Permissions {
      *
      * @var \Oxygen\Auth\Permissions\PermissionsInterface
      */
-
     protected $permissionsInterface;
 
     /**

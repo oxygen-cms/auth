@@ -39,7 +39,6 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->publishes([
             __DIR__ . '/../resources/config/config.php' => config_path('oxygen/auth.php'),
             __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
-            __DIR__ . '/../resources/views' => base_path('resources/views/vendor/oxygen/auth')
         ]);
 
 		$this->app['router']->middleware('oxygen.auth', Authenticate::class);
