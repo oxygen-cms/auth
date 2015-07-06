@@ -33,7 +33,6 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 */
 	public function boot() {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
-        $this->loadEntitiesFrom(__DIR__ . '/Entity');
 
         $this->publishes([
             __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
@@ -51,6 +50,8 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 */
 
 	public function register() {
+        $this->loadEntitiesFrom(__DIR__ . '/Entity');
+
 		// Permissions System
         $this->app->bind(PermissionsInterface::class, SimplePermissionsSystem::class);
 
