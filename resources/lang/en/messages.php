@@ -23,6 +23,19 @@ return [
    'filter' => [
         'notLoggedIn'          => 'You need to be logged in to view that page.',
         'alreadyLoggedIn'      => 'You\'re already logged in'
+    ],
+
+
+    /*
+    | ---------------
+    | Permissions
+    | ---------------
+    |
+    | Messages related to the permissions system.
+    */
+
+    'permissions' => [
+        'noPermissions' => 'Insufficient Permissions',
     ]
 
 ];
