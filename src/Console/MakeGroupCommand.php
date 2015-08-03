@@ -37,7 +37,7 @@ class MakeGroupCommand extends Command {
     public function handle(GroupRepositoryInterface $groups) {
         $name = $this->argument('name');
 
-        $description = $this->option('description');
+        $description = $this->ask('Description of the group');
 
         $preferences = file_get_contents(__DIR__ . '/../../resources/seed/group_preferences.json');
         $permissions = file_get_contents(__DIR__ . '/../../resources/seed/group_permissions.json');
@@ -49,7 +49,7 @@ class MakeGroupCommand extends Command {
             $item->setPreferences($preferences);
             $item->setPermissions($permissions);
             $groups->persist($item);
-            
+
             $this->info('Group created with id ' . $item->getId());
         } catch(InvalidEntityException $e) {
             $this->error($e->getErrors()->first());
@@ -63,13 +63,7 @@ class MakeGroupCommand extends Command {
      */
     protected function getArguments() {
         return [
-            ['name', InputArgument::REQUIRED, 'Name of User.']
-        ];
-    }
-
-    protected function getOptions() {
-        return [
-            ['description', null, InputOption::VALUE_OPTIONAL, 'The description for the group']
+            ['name', InputArgument::REQUIRED, 'Name of the group']
         ];
     }
 

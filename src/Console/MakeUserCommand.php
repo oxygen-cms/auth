@@ -37,9 +37,9 @@ class MakeUserCommand extends Command {
 	public function handle(UserRepositoryInterface $users) {
 		$username = $this->argument('name');
 
-		$fullName = $this->anticipate('Full Name:', [$username]);
-		$email = $this->ask('Email Address:');
-		$password = $this->secret('Password: ');
+		$fullName = $this->anticipate('Full Name', [$username]);
+		$email = $this->ask('Email Address');
+		$password = $this->secret('Password');
 
 		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
 
@@ -50,7 +50,7 @@ class MakeUserCommand extends Command {
 			$item->setEmail($email);
 			$item->setPreferences($preferences);
 			$item->setPassword($password);
-			$item->setGroup($users->getReference((int) $this->option('user')));
+			$item->setGroup($users->getReference((int) $this->option('group')));
 			$users->persist($item);
 
 			$this->info('User Created');
@@ -66,7 +66,7 @@ class MakeUserCommand extends Command {
 	 */
 	protected function getArguments() {
 		return [
-			['name', InputArgument::REQUIRED, 'Name of User.']
+			['name', InputArgument::REQUIRED, 'Name of the user']
 		];
 	}
 
