@@ -42,11 +42,12 @@ class MakeUserCommand extends Command {
 		$password = $this->secret('Password');
 
 		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
-
+		
 		try {
 			$item = $users->make();
 			$item->setAllFillable(true);
 			$item->setUsername($username);
+			$item->setFullName($fullName);
 			$item->setEmail($email);
 			$item->setPreferences($preferences);
 			$item->setPassword($password);
@@ -73,7 +74,7 @@ class MakeUserCommand extends Command {
 	protected function getOptions()
 	{
 		return [
-			['group', null, InputOption::VALUE_REQUIRED, 'The group this user should belong to']
+			['group', false, InputOption::VALUE_REQUIRED, 'The group this user should belong to']
 		];
 	}
 
