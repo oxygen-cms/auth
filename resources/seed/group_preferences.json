@@ -1,0 +1,41 @@
+{
+  "editor": {
+    "defaultMode": "split",
+    "theme": "dark",
+    "ace": {
+      "theme": "ace\/theme\/tomorrow_night_eighties",
+      "fontSize": "12px",
+      "wordWrap": false,
+      "highlightActiveLine": true,
+      "showPrintMargin": false,
+      "showInvisibles": false
+    },
+    "ckeditor": {
+      "toolbarGroups": [
+        { "name": "document", "groups": [ "mode", "document", "doctools" ] },
+        { "name": "clipboard" },
+        { "name": "undo" },
+        { "name": "editing", "groups": [ "find", "selection", "spellchecker" ] },
+        { "name": "tools" },
+        "/",
+        { "name": "list" },
+        { "name": "indentalign", "groups": ["indent", "align", "bidi"] },
+        { "name": "links" },
+        { "name": "insert", "groups": ["insert", "blocks"]},
+        { "name": "forms" },
+        "/",
+        { "name": "basicstyles", "groups": [ "basicstyles", "cleanup" ] },
+        { "name": "styles" },
+        { "name": "colors" }
+      ],
+      "skin": "moono",
+      "formatTags": "p;h1;h2;h3;h4;h5;h6;pre",
+      "allowedContent": true,
+      "removePlugins": "resize,maximize,sourcearea,pastefromword",
+      "removeDialogTabs": "image:advanced",
+      "removeButtons": "Strike,Subscript,Superscript",
+      "extraPlugins": "find,showblocks,div"
+    }
+  },
+  "fontSize": "87.5%"
+}

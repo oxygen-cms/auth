@@ -63,7 +63,7 @@ class Authenticate {
     public function handle($request, Closure $next) {
         if($this->auth->guest()) {
             $route = 'auth.getLogin';
-            
+
             $this->session->put('url.intended', $request->fullUrl());
             return $this->response->notification(
                 new Notification($this->lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED),

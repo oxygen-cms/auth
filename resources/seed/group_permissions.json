@@ -1,0 +1,109 @@
+{
+  "_root": {
+    "_access": true
+  },
+
+  "_resource": {
+    "getList": true,
+    "getView": true,
+    "getInfo": true,
+    "getCreate": true,
+    "postCreate": true,
+    "getUpdate": true,
+    "putUpdate": true,
+    "deleteDelete": true,
+    "getTrash": true,
+    "postRestore": true,
+    "deleteForce": true,
+    "versions": true,
+    "postNewVersion": true,
+    "postMakeHeadVersion": true,
+    "deleteVersions": true,
+    "postPublish": true,
+    "postMakeDraft": true
+  },
+
+  "_content": {
+    "_parent": "_resource",
+    "getPreview": true,
+    "getContent": true
+  },
+
+  "pages": {
+    "_parent": "_content"
+  },
+
+  "partials": {
+    "_parent": "_content"
+  },
+
+  "upcomingEvents": {
+    "_parent": "_resource"
+  },
+
+  "emails": {
+    "_parent": "_resource",
+    "getGenerateCode": true
+  },
+
+  "media": {
+    "_parent": "_resource",
+    "getUpload": true,
+    "postUpload": true,
+    "getRaw": true,
+    "getEditImage": true,
+    "postEditImage": true,
+    "getUse": true,
+    "postMakeResponsive": true
+  },
+
+  "users": {
+    "_parent": "_resource"
+  },
+
+  "groups": {
+    "_parent": "_resource"
+  },
+
+  "auth": {
+    "getInfo": true,
+    "getUpdate": true,
+    "putUpdate": true,
+    "postLogout": true,
+    "getPreferences": true,
+    "postPreferences": true,
+    "getChangePassword": true,
+    "postChangePassword": true,
+    "deleteForce": true
+  },
+
+  "preferences": {
+    "getView": true,
+    "getUpdate": true,
+    "putUpdate": true
+  },
+
+  "marketplace": {
+    "getHome": true,
+    "getDetails": true,
+    "postRequire": true,
+    "postInstall": true,
+    "getInstallProgress": true,
+    "postInstallProgress": true,
+    "deleteInstallProgress": true,
+    "getInstalled": true,
+    "postToggleProvider": true
+  },
+
+  "security": {
+    "getList": true,
+    "getLoginLog": true,
+    "postLoginLocation": true
+  },
+
+  "importExport": {
+    "getList": true,
+    "getExport": true,
+    "postImport": true
+  }
+}

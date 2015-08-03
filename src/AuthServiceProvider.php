@@ -3,6 +3,8 @@
 namespace Oxygen\Auth;
 
 use Illuminate\Contracts\Http\Kernel;
+use Oxygen\Auth\Console\MakeGroupCommand;
+use Oxygen\Auth\Console\MakeUserCommand;
 use Oxygen\Auth\Middleware\Authenticate;
 use Oxygen\Auth\Middleware\Permissions;
 use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
@@ -41,6 +43,9 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->app['router']->middleware('oxygen.auth', Authenticate::class);
 		$this->app['router']->middleware('oxygen.guest', RedirectIfAuthenticated::class);
 		$this->app['router']->middleware('oxygen.permissions', Permissions::class);
+
+		$this->commands(MakeUserCommand::class);
+		$this->commands(MakeGroupCommand::class);
 	}
 
 	/**
