@@ -37,11 +37,19 @@ class MakeUserCommand extends Command {
 	 * @return mixed
 	 */
 	public function handle(UserRepositoryInterface $users, GroupRepositoryInterface $groups) {
-		$username = $this->argument('name');
+		$username = $this->ask('Username');
 
 		$fullName = $this->anticipate('Full Name', [$username]);
 		$email = $this->ask('Email Address');
 		$password = $this->secret('Password');
+		
+		$allGroups = $groups->all();
+		$mappedGroups = [];
+		foreach($allGroups as $group) {
+			$mappedGroups[$group->getName()] = $group;
+		}
+
+		$group = $mappedGroups[$this->choice('Group', array_keys($mappedGroups))];
 
 		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
 		
@@ -53,31 +61,13 @@ class MakeUserCommand extends Command {
 			$item->setEmail($email);
 			$item->setPreferences($preferences);
 			$item->setPassword($password);
-			$item->setGroup($groups->getReference((int) $this->option('group')));
+			$item->setGroup($group);
 			$users->persist($item);
 
 			$this->info('User Created');
 		} catch(InvalidEntityException $e) {
 			$this->error($e->getErrors()->first());
 		}
-	}
-
-	/**
-	 * Get the console command arguments.
-	 *
-	 * @return array
-	 */
-	protected function getArguments() {
-		return [
-			['name', InputArgument::REQUIRED, 'Name of the user']
-		];
-	}
-
-	protected function getOptions()
-	{
-		return [
-			['group', false, InputOption::VALUE_REQUIRED, 'The group this user should belong to']
-		];
 	}
 
 }

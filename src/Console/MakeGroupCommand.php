@@ -37,7 +37,7 @@ class MakeGroupCommand extends Command {
     public function handle(GroupRepositoryInterface $groups) {
         $name = $this->argument('name');
 
-        $description = $this->ask('Description of the group');
+        $description = $this->option('description');
 
         $preferences = file_get_contents(__DIR__ . '/../../resources/seed/group_preferences.json');
         $permissions = file_get_contents(__DIR__ . '/../../resources/seed/group_permissions.json');
@@ -64,6 +64,17 @@ class MakeGroupCommand extends Command {
     protected function getArguments() {
         return [
             ['name', InputArgument::REQUIRED, 'Name of the group']
+        ];
+    }
+
+    /**
+     * Get the console command options.
+     *
+     * @return array
+     */
+    protected function getOptions() {
+        return [
+            ['description', null, InputOption::VALUE_REQUIRED, 'Description of the group', '']
         ];
     }
 
