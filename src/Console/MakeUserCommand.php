@@ -42,14 +42,16 @@ class MakeUserCommand extends Command {
 		$fullName = $this->anticipate('Full Name', [$username]);
 		$email = $this->ask('Email Address');
 		$password = $this->secret('Password');
-		
+
 		$allGroups = $groups->all();
+		$groupNames = [];
 		$mappedGroups = [];
 		foreach($allGroups as $group) {
+			$groupNames[] = $group->getName();
 			$mappedGroups[$group->getName()] = $group;
 		}
 
-		$group = $mappedGroups[$this->choice('Group', array_keys($mappedGroups))];
+		$group = $mappedGroups[$this->choice('Group', $groupNames)];
 
 		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
 		
