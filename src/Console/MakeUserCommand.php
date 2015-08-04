@@ -2,6 +2,7 @@
 
 namespace Oxygen\Auth\Console;
 
+use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Core\Console\Command;
 
@@ -31,10 +32,11 @@ class MakeUserCommand extends Command {
 	/**
 	 * Execute the console command.
 	 *
-	 * @param \Oxygen\Auth\Repository\UserRepositoryInterface $users
+	 * @param \Oxygen\Auth\Repository\UserRepositoryInterface  $users
+	 * @param \Oxygen\Auth\Repository\GroupRepositoryInterface $groups
 	 * @return mixed
 	 */
-	public function handle(UserRepositoryInterface $users) {
+	public function handle(UserRepositoryInterface $users, GroupRepositoryInterface $groups) {
 		$username = $this->argument('name');
 
 		$fullName = $this->anticipate('Full Name', [$username]);
@@ -51,7 +53,7 @@ class MakeUserCommand extends Command {
 			$item->setEmail($email);
 			$item->setPreferences($preferences);
 			$item->setPassword($password);
-			$item->setGroup($users->getReference((int) $this->option('group')));
+			$item->setGroup($groups->getReference((int) $this->option('group')));
 			$users->persist($item);
 
 			$this->info('User Created');
