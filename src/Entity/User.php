@@ -11,6 +11,7 @@ use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
 use Oxygen\Data\Behaviour\PrimaryKey;
+use Oxygen\Data\Behaviour\PrimaryKeyInterface;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Validation\Validatable;
@@ -23,7 +24,7 @@ use Oxygen\Preferences\Repository;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements Validatable, Authenticatable, CanResetPassword {
+class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanResetPassword {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use Accessors, Fillable;

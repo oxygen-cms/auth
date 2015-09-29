@@ -8,6 +8,7 @@ use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
 use Oxygen\Data\Behaviour\PrimaryKey;
+use Oxygen\Data\Behaviour\PrimaryKeyInterface;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Validation\Validatable;
@@ -18,7 +19,7 @@ use Oxygen\Data\Validation\Validatable;
  * @ORM\HasLifecycleCallbacks
  */
 
-class Group implements Validatable {
+class Group implements Validatable, PrimaryKeyInterface {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
 
