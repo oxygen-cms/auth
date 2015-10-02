@@ -41,11 +41,7 @@ class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanRese
 
     protected $fullName;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-
-    protected $email;
+    /* protected $email; <--- exists inside the `RememberToken` trait */
 
     /**
      * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade="persist")
