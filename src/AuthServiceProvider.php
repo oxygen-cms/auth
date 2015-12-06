@@ -55,7 +55,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 */
 
 	public function register() {
-        $this->loadEntitiesFrom('Oxygen\Auth\Entity');
+		$this->loadEntitiesFrom(__DIR__ . '/Entity');
 
 		// Permissions System
         $this->app->bind(PermissionsInterface::class, SimplePermissionsSystem::class);
