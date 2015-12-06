@@ -3,7 +3,7 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\ORM\Mapping AS ORM;
-use LaravelDoctrine\ORM\Contracts\Auth\Authenticatable
+use LaravelDoctrine\ORM\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Oxygen\Auth\Permissions\Permissions;
