@@ -44,6 +44,17 @@ class MakeUserCommand extends Command {
 		$password = $this->secret('Password');
 
 		$allGroups = $groups->all();
+
+		if(empty($allGroups) && $this->confirm('There are no groups in the database. Would you like to create one? [y|N]')) {
+			$groupName = $this->ask('Group Name');
+			$this->call('make:group', ['name' => $groupName]);
+			$allGroups = $groups->all();
+		}
+
+		if(empty($allGroups)) {
+			$this->error('Cannot create a user without a group');
+		}
+
 		$groupNames = [];
 		$mappedGroups = [];
 		foreach($allGroups as $group) {
