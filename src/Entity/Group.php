@@ -12,14 +12,15 @@ use Oxygen\Data\Behaviour\PrimaryKeyInterface;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Validation\Validatable;
+use Oxygen\Data\Behaviour\Searchable;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="groups")
+ * @ORM\Table(name="`groups`")
  * @ORM\HasLifecycleCallbacks
  */
 
-class Group implements Validatable, PrimaryKeyInterface {
+class Group implements Validatable, PrimaryKeyInterface, Searchable {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
 
@@ -96,6 +97,15 @@ class Group implements Validatable, PrimaryKeyInterface {
     public function setPermissions($permissions) {
         $this->permissions = is_string($permissions) ? $permissions : json_encode($permissions, JSON_PRETTY_PRINT);
         return $this;
+    }
+
+    /**
+     * Returns the fields that should be searched.
+     *
+     * @return array
+     */
+    public static function getSearchableFields() {
+        return ['name', 'description'];
     }
 
 }

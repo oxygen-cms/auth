@@ -17,6 +17,7 @@ use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Authentication;
 use Oxygen\Preferences\Repository;
+use Oxygen\Data\Behaviour\Searchable;
 
 /**
  * @ORM\Entity
@@ -24,7 +25,7 @@ use Oxygen\Preferences\Repository;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanResetPassword {
+class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanResetPassword, Searchable {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use Accessors, Fillable;
@@ -143,5 +144,14 @@ class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanRese
      */
     public function getEmailForPasswordReset() {
         return $this->email;
+    }
+
+    /**
+     * Returns the fields that should be searched.
+     *
+     * @return array
+     */
+    public static function getSearchableFields() {
+        return ['username', 'fullName'];
     }
 }
