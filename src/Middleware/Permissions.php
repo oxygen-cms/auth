@@ -4,6 +4,7 @@ namespace Oxygen\Auth\Middleware;
 
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
+use Oxygen\Auth\Entity\User;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Core\Translation\Translator;
@@ -53,7 +54,8 @@ class Permissions {
      * @return mixed
      */
     public function handle($request, Closure $next, $permission) {
-        if(!$this->auth->user()->hasPermissions($permission)) {
+        $user = $this->auth->user();
+        if(!($user instanceof User) || !$user->hasPermissions($permission)) {
             $notification = new Notification(
                 $this->lang->get('oxygen/auth::messages.permissions.noPermissions', ['permission' => $permission]),
                 Notification::FAILED

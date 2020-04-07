@@ -4,8 +4,6 @@ namespace Oxygen\Auth\Permissions;
 
 use RuntimeException;
 
-use App;
-
 trait Permissions {
 
     /**
@@ -39,7 +37,7 @@ trait Permissions {
      */
     public function hasPermissions($key) {
         if($this->permissionsInterface === null) {
-            $this->permissionsInterface = App::make(PermissionsInterface::class);
+            $this->permissionsInterface = resolve(PermissionsInterface::class);
         }
 
         if($this->permissionsInterface->needsPermissions()) {

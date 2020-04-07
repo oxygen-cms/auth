@@ -3,7 +3,7 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\ORM\Mapping AS ORM;
-use LaravelDoctrine\ORM\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Oxygen\Auth\Permissions\Permissions;
@@ -25,7 +25,7 @@ use Oxygen\Data\Behaviour\Searchable;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanResetPassword, Searchable {
+class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use Accessors, Fillable;
@@ -62,12 +62,13 @@ class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanRese
      * Returns a new preferences repository from the given preferences.
      *
      * @return Repository
+     * @throws \Exception
      */
     public function createPreferencesRepository() {
         $this->createJsonTransformer();
         $repository = static::$jsonTransformer->toRepository($this->preferences);
-        if($this->getGroup() != null) {
-            $repository->addFallbackRepository($this->getGroup()->getPreferences());
+        if($this->group != null) {
+            $repository->addFallbackRepository($this->group->getPreferences());
         }
         return $repository;
     }
@@ -153,5 +154,13 @@ class User implements PrimaryKeyInterface, Validatable, Authenticatable, CanRese
      */
     public static function getSearchableFields() {
         return ['username', 'fullName'];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function sendPasswordResetNotification($token) {
+        // TODO: Implement sendPasswordResetNotification() method.
+        throw new \RuntimeException("sendPasswordResetNotificationMethod unimplemented");
     }
 }
