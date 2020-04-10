@@ -3,9 +3,11 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\ORM\Mapping AS ORM;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\MessageBag;
 use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
@@ -14,10 +16,14 @@ use Oxygen\Data\Behaviour\PrimaryKey;
 use Oxygen\Data\Behaviour\PrimaryKeyInterface;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
+use Oxygen\Data\Exception\InvalidEntityException;
 use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Authentication;
 use Oxygen\Preferences\Repository;
+use Illuminate\Notifications\Notifiable;
 use Oxygen\Data\Behaviour\Searchable;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * @ORM\Entity
@@ -28,6 +34,7 @@ use Oxygen\Data\Behaviour\Searchable;
 class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
+    use \LaravelDoctrine\ORM\Notifications\Notifiable;
     use Accessors, Fillable;
 
     /**
@@ -109,6 +116,10 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
                 'required',
                 'email',
                 'max:255'
+            ],
+            'preferences' => [
+                'required',
+                'json'
             ]
         ];
     }
@@ -132,19 +143,16 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      *
      * @param string $password
      * @return $this
+     * @throws InvalidEntityException
      */
     public function setPassword($password) {
+        if($password == null || trim($password) == '') {
+            $errors = new MessageBag();
+            $errors->add('password', 'The password field cannot be empty');
+            throw new InvalidEntityException($this, $errors);
+        }
         $this->password = Hash::make($password);
         return $this;
-    }
-
-    /**
-     * Get the e-mail address where password reset links are sent.
-     *
-     * @return string
-     */
-    public function getEmailForPasswordReset() {
-        return $this->email;
     }
 
     /**
@@ -157,10 +165,18 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     }
 
     /**
+     * Get the e-mail address where password reset links are sent.
+     *
+     * @return string
+     */
+    public function getEmailForPasswordReset() {
+        return $this->email;
+    }
+
+    /**
      * @inheritDoc
      */
     public function sendPasswordResetNotification($token) {
-        // TODO: Implement sendPasswordResetNotification() method.
-        throw new \RuntimeException("sendPasswordResetNotificationMethod unimplemented");
+        Notification::send([$this], new ResetPassword($token));
     }
 }

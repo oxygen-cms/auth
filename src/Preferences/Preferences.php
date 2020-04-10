@@ -73,7 +73,12 @@ trait Preferences {
      */
     public function createPreferencesRepository() {
         $this->createJsonTransformer();
-        return static::$jsonTransformer->toRepository($this->preferences);
+        try {
+            return static::$jsonTransformer->toRepository($this->preferences);
+        } catch(\Exception $e) {
+            logger()->warning('Exception while creating entity preferences repository, ' . $e->getMessage());
+            return new Repository([]);
+        }
     }
 
     /**

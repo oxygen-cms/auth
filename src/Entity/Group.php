@@ -65,6 +65,14 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
             'name' => [
                 'required',
                 'max:255'
+            ],
+            'preferences' => [
+                'required',
+                'json'
+            ],
+            'permissions' => [
+                'required',
+                'json'
             ]
         ];
     }

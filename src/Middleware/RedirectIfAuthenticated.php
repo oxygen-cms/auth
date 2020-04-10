@@ -3,6 +3,7 @@
 namespace Oxygen\Auth\Middleware;
 
 use Closure;
+use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Config\Repository;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
@@ -13,7 +14,7 @@ use Oxygen\Preferences\PreferencesManager;
 class RedirectIfAuthenticated {
 
     /**
-     * @var \Illuminate\Contracts\Auth\Guard
+     * @var AuthManager
      */
     private $auth;
 
@@ -32,7 +33,7 @@ class RedirectIfAuthenticated {
      */
     private $preferences;
 
-    public function __construct(Guard $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
+    public function __construct(AuthManager $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
         $this->auth = $auth;
         $this->response = $response;
         $this->lang = $lang;
@@ -42,12 +43,13 @@ class RedirectIfAuthenticated {
     /**
      * Run the request filter.
      *
-     * @param  \Illuminate\Http\Request                       $request
-     * @param  \Closure                                       $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
      * @return mixed
+     * @throws \Oxygen\Preferences\PreferenceNotFoundException
      */
     public function handle($request, Closure $next) {
-        if($this->auth->check()) {
+        if($this->auth->guard()->check()) {
             return $this->response->notification(
                 new Notification($this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn')),
                 ['redirect' => $this->preferences->get('modules.auth::dashboard')]
