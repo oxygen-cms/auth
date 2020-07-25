@@ -2,6 +2,8 @@
 
 namespace Oxygen\Auth\Entity;
 
+use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
 use Doctrine\ORM\Mapping AS ORM;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
@@ -31,22 +33,22 @@ use Illuminate\Support\Facades\Notification;
  * @ORM\HasLifecycleCallbacks
  */
 
-class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable {
+class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
     use \LaravelDoctrine\ORM\Notifications\Notifiable;
     use Accessors, Fillable;
 
+    use DoctrineTwoFactorAuthentication;
+
     /**
      * @ORM\Column(type="string", unique=true)
      */
-
     protected $username;
 
     /**
      * @ORM\Column(name="full_name", type="string")
      */
-
     protected $fullName;
 
     /* protected $email; <--- exists inside the `RememberToken` trait */
@@ -54,7 +56,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     /**
      * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade="persist")
      */
-
     protected $group;
 
     /**
@@ -62,7 +63,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      *
      * @var boolean
      */
-
     protected $allFillable;
 
     /**
@@ -129,7 +129,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      *
      * @return array
      */
-
     protected function getFillableFields() {
         if($this->allFillable) {
             return ['username', 'fullName', 'email', 'preferences', 'group'];
@@ -176,7 +175,8 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     /**
      * @inheritDoc
      */
-    public function sendPasswordResetNotification($token) {
+    public function sendPasswordResetNotification($token)
+    {
         Notification::send([$this], new ResetPassword($token));
     }
 }

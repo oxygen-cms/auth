@@ -27,25 +27,21 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
     /**
      * @ORM\Column(type="string")
      */
-
     protected $name;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-
     protected $description;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-
     protected $permissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\User", mappedBy="group")
      */
-
     protected $users;
 
     /**
