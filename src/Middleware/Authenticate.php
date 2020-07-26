@@ -7,7 +7,6 @@ use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
-use Illuminate\Session\SessionManager;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Illuminate\Translation\Translator;
 use Oxygen\Core\Http\Notification;
@@ -56,12 +55,10 @@ class Authenticate {
      */
     public function handle($request, Closure $next) {
         if($this->auth->guard()->guest()) {
-            $route = 'auth.getLogin';
-
             $request->session()->put('url.intended', $request->fullUrl());
             return $this->response->notification(
                 new Notification($this->lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED),
-                ['redirect' => $route]
+                ['redirect' => 'auth.getLogin']
             );
         }
 

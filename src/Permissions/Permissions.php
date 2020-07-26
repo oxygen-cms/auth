@@ -20,13 +20,7 @@ trait Permissions {
      * @return array
      */
     public function decodePermissions() {
-        $permissions = $this->group->getPermissions();
-
-        if(json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException("Could Not Decode User Permissions: " . json_last_error_msg());
-        }
-
-        return $permissions;
+        return $this->group->getPermissions();
     }
 
     /**

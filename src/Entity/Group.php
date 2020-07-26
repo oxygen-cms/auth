@@ -87,9 +87,14 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * Returns the group's permissions.
      *
      * @return array
+     * @throws \RuntimeException if user permissions couldn't be decoded.
      */
     public function getPermissions() {
-        return json_decode($this->permissions, true);
+        $res = json_decode($this->permissions, true);
+        if(json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException("Could Not Decode User Permissions: " . json_last_error_msg());
+        }
+        return $res;
     }
 
     /**

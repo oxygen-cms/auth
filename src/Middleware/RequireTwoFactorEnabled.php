@@ -9,6 +9,8 @@ namespace Oxygen\Auth\Middleware;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Oxygen\Core\Http\Notification;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 
@@ -44,7 +46,7 @@ class RequireTwoFactorEnabled {
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
      * @param  string  $redirectToRoute
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|mixed
+     * @return JsonResponse|RedirectResponse|mixed
      */
     public function handle($request, Closure $next, $redirectToRoute = '2fa.notice') {
         if (!$this->user->hasTwoFactorEnabled()) {
