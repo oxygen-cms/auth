@@ -59,6 +59,11 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     protected $group;
 
     /**
+     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\AuthenticationLogEntry", mappedBy="user")
+     */
+    protected $authenticationLogEntries;
+
+    /**
      * True if all fields should be fillable (only for Administrators)
      *
      * @var boolean

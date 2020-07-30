@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Illuminate\Translation\Translator;
 use Oxygen\Core\Http\Notification;
+use Illuminate\Support\Str;
 
 class Authenticate {
 
@@ -45,6 +46,10 @@ class Authenticate {
         $this->lang = $lang;
         $this->url = $generator;
     }
+    
+    private function isPartOfApi($path) {
+        return Str::startsWith($path, 'oxygen/api');
+    }
 
     /**
      * Run the request filter.
@@ -55,11 +60,20 @@ class Authenticate {
      */
     public function handle($request, Closure $next) {
         if($this->auth->guard()->guest()) {
-            $request->session()->put('url.intended', $request->fullUrl());
-            return $this->response->notification(
-                new Notification($this->lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED),
-                ['redirect' => 'auth.getLogin']
-            );
+            $notification = new Notification($this->lang->get('oxygen/auth::messages.filter.notLoggedIn'), Notification::FAILED);
+            if($this->isPartOfApi($request->path())) {
+                $request->session()->put('adminMessage', $notification->toArray());
+                return response()->json([
+                    'status' => Notification::FAILED,
+                    'authenticated' => false
+                ]);
+            } else {
+                $request->session()->put('url.intended', $request->fullUrl());
+                return $this->response->notification(
+                    $notification,
+                    ['redirect' => 'auth.getLogin', 'hardRedirect' => true]
+                );
+            }
         }
 
         return $next($request);
