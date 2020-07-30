@@ -85,6 +85,7 @@ class DoctrineAuthenticationLogEntryRepository extends Repository implements Aut
         $q = $this->createSelectQuery()
             ->where('o.user = :user')
             ->setParameter('user', $user)
+            ->orderBy('o.id', 'DESC')
             ->getQuery();
         return $this->applyPagination($q, $perPage, $currentPage);
     }
