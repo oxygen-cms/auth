@@ -7,6 +7,7 @@ use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Http\Request;
+use Oxygen\Core\Contracts\CoreConfiguration;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Illuminate\Translation\Translator;
 use Oxygen\Core\Http\Notification;
@@ -35,16 +36,22 @@ class Authenticate {
     private $url;
 
     /**
+     * @var CoreConfiguration
+     */
+    private $coreConfig;
+
+    /**
      * @param AuthManager $auth
      * @param ResponseFactory $response
      * @param UrlGenerator $generator
      * @param Translator $lang
      */
-    public function __construct(AuthManager $auth, ResponseFactory $response,  UrlGenerator $generator, Translator $lang) {
+    public function __construct(AuthManager $auth, ResponseFactory $response,  UrlGenerator $generator, Translator $lang, CoreConfiguration $coreConfig) {
         $this->auth = $auth;
         $this->response = $response;
         $this->lang = $lang;
         $this->url = $generator;
+        $this->coreConfig = $coreConfig;
     }
     
     private function isPartOfApi($path) {
@@ -69,6 +76,12 @@ class Authenticate {
                 ]);
             } else {
                 $request->session()->put('url.intended', $request->fullUrl());
+
+                if(trim($request->path(), '/') === $this->coreConfig->getAdminUriPrefix()) {
+                    // don't display an error message if we only visited '/oxygen'
+                    return redirect()->route('auth.getLogin');
+                }
+
                 return $this->response->notification(
                     $notification,
                     ['redirect' => 'auth.getLogin', 'hardRedirect' => true]
