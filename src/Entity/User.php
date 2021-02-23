@@ -180,8 +180,28 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     /**
      * @inheritDoc
      */
-    public function sendPasswordResetNotification($token)
-    {
+    public function sendPasswordResetNotification($token) {
         Notification::send([$this], new ResetPassword($token));
+    }
+
+    /**
+     * Converts this model to JSON-equivalent array form suitable for returning from API endpoints.
+     *
+     * @return array
+     */
+    public function toArray() {
+        $preferencesRepo = $this->getPreferences();
+
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'fullName' => $this->fullName,
+            'email' => $this->email,
+            'preferences' => $preferencesRepo->toArray(),
+            'permissions' => $this->group->getPermissions(),
+            'group' => $this->group->toArray(),
+            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(\DateTime::ATOM) : null,
+            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(\DateTime::ATOM) : null
+        ];
     }
 }

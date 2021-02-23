@@ -117,4 +117,17 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
         return ['name', 'description'];
     }
 
+    /**
+     * Returns information about a group.
+     *
+     * @return array
+     */
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description
+        ];
+    }
+
 }
