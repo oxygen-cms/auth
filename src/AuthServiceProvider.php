@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Routing\Router;
 use Oxygen\Auth\Console\MakeGroupCommand;
 use Oxygen\Auth\Console\MakeUserCommand;
+use Oxygen\Auth\Console\UsersListCommand;
 use Oxygen\Auth\Listeners\LogAuthentications;
 use Oxygen\Auth\Middleware\Authenticate;
 use Oxygen\Auth\Middleware\ConfirmTwoFactorCode;
@@ -48,6 +49,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 
 		$this->commands(MakeUserCommand::class);
 		$this->commands(MakeGroupCommand::class);
+        $this->commands(UsersListCommand::class);
 
         $this->app['events']->listen(Login::class, LogAuthentications::class);
         $this->app['events']->listen(Logout::class, LogAuthentications::class);
