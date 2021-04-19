@@ -134,7 +134,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      *
      * @return array
      */
-    protected function getFillableFields() {
+    public function getFillableFields(): array {
         if($this->allFillable) {
             return ['username', 'fullName', 'email', 'preferences', 'group'];
         } else {
