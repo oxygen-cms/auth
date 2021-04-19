@@ -78,8 +78,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      *
      * @return array
      */
-
-    protected function getFillableFields() {
+    public function getFillableFields(): array {
         return ['name', 'description', 'preferences', 'permissions'];
     }
 
