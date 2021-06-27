@@ -4,11 +4,11 @@ namespace Oxygen\Auth\Middleware;
 
 use Closure;
 use Illuminate\Auth\AuthManager;
-use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Config\Repository;
+use Illuminate\Http\Request;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Illuminate\Translation\Translator;
 use Oxygen\Core\Http\Notification;
+use Oxygen\Preferences\PreferenceNotFoundException;
 use Oxygen\Preferences\PreferencesManager;
 
 class RedirectIfAuthenticated {
@@ -19,17 +19,17 @@ class RedirectIfAuthenticated {
     private $auth;
 
     /**
-     * @var \Oxygen\Core\Contracts\Routing\ResponseFactory
+     * @var ResponseFactory
      */
     private $response;
 
     /**
-     * @var \Illuminate\Translation\Translator
+     * @var Translator
      */
     private $lang;
 
     /**
-     * @var \Oxygen\Preferences\PreferencesManager
+     * @var PreferencesManager
      */
     private $preferences;
 
@@ -43,10 +43,10 @@ class RedirectIfAuthenticated {
     /**
      * Run the request filter.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
-     * @throws \Oxygen\Preferences\PreferenceNotFoundException
+     * @throws PreferenceNotFoundException
      */
     public function handle($request, Closure $next) {
         if($this->auth->guard()->check()) {

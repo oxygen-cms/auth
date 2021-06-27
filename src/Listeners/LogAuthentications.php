@@ -53,7 +53,7 @@ class LogAuthentications {
         $user = $event->user;
         $ip = $this->request->ip();
         $userAgent = $this->request->userAgent();
-        
+
 
         $authenticationLog = new AuthenticationLogEntry();
         $authenticationLog->setIpAddress($ip);
@@ -61,13 +61,13 @@ class LogAuthentications {
         if($user !== null) {
             $authenticationLog->setUser($user);
         }
-        
+
         if($event instanceof Login) {
             $authenticationLog->setType(AuthenticationLogEntry::LOGIN_SUCCESS);
 
             $known = $this->log->isKnownDevice($user, $ip, $userAgent);
 
-            if(!$known && !$this->log->isFirstLogin($user) && $this->preferences->get('modules.auth::notifyWhenNewDevice')) {
+            if(!$known && !$this->log->isFirstLogin($user) && $this->preferences->get('modules.auth::notifyWhenNewDevice', true)) {
                 $user->notify(new NewDeviceNotification($authenticationLog));
             }
         } else if($event instanceof Logout) {
@@ -76,7 +76,7 @@ class LogAuthentications {
             $authenticationLog->setUsername($event->credentials['username']);
             $authenticationLog->setType(AuthenticationLogEntry::LOGIN_FAILED);
         }
-        
+
         $this->log->persist($authenticationLog);
         $this->log->flush();
     }

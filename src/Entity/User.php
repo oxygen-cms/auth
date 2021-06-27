@@ -22,9 +22,7 @@ use Oxygen\Data\Exception\InvalidEntityException;
 use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Authentication;
 use Oxygen\Preferences\Repository;
-use Illuminate\Notifications\Notifiable;
 use Oxygen\Data\Behaviour\Searchable;
-use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Support\Facades\Notification;
 
 /**
@@ -54,7 +52,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     /* protected $email; <--- exists inside the `RememberToken` trait */
 
     /**
-     * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade="persist")
+     * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade={"persist"})
      */
     protected $group;
 
