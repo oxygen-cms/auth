@@ -17,10 +17,11 @@
         "php": ">=7.2.0",
         "oxygen/core": "~0.10.0",
         "oxygen/data": "~0.10.0",
-        "oxygen/preferences": "~0.3.7",
+        "oxygen/preferences": "~0.3.8",
         "illuminate/support": "~6.0",
         "darkghosthunter/laraguard": "dev-master",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-zip": "*"
     },
     "autoload": {
         "psr-4": {
@@ -34,11 +35,7 @@
         "changes": "changes.md",
         "icon": "icon.png",
         "providers": [
-            {
-                "name": "Auth",
-                "class": "Oxygen\\Auth\\AuthServiceProvider",
-                "description": "Authorisation Framework"
-            }
+            "Oxygen\\Auth\\AuthServiceProvider"
         ]
     },
     "config": {
