@@ -82,7 +82,7 @@ class AuthServiceProvider extends BaseServiceProvider {
      */
 	public function provides() {
 	    return [
-	        PermissionsInterface::class,
+            PermissionsInterface::class,
             UserRepositoryInterface::class,
             GroupRepositoryInterface::class,
             AuthenticationLogEntryRepositoryInterface::class
