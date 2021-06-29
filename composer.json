@@ -30,13 +30,11 @@
     },
     "minimum-stability": "stable",
     "extra": {
-        "title": "Oxygen Auth",
-        "readme": "oxygen.md",
-        "changes": "changes.md",
-        "icon": "icon.png",
-        "providers": [
-            "Oxygen\\Auth\\AuthServiceProvider"
-        ]
+        "laravel": {
+            "providers": [
+                "Oxygen\\Auth\\AuthServiceProvider"
+            ]
+        }
     },
     "config": {
         "platform": {

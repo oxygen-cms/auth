@@ -25,6 +25,7 @@ use Oxygen\Auth\Repository\DoctrineUserRepository;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\BaseServiceProvider;
+
 class AuthServiceProvider extends BaseServiceProvider {
 
 	/**
@@ -73,5 +74,19 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->app->bind(GroupRepositoryInterface::class, DoctrineGroupRepository::class);
         $this->app->bind(AuthenticationLogEntryRepositoryInterface::class, DoctrineAuthenticationLogEntryRepository::class);
 	}
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+	public function provides() {
+	    return [
+	        PermissionsInterface::class,
+            UserRepositoryInterface::class,
+            GroupRepositoryInterface::class,
+            AuthenticationLogEntryRepositoryInterface::class
+        ];
+    }
 
 }
