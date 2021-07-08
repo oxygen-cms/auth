@@ -1,26 +1,39 @@
 <?php
 
+
 namespace Oxygen\Auth\Permissions;
 
-use RuntimeException;
 
-trait Permissions {
+use Illuminate\Auth\AuthManager;
+use Oxygen\Auth\Entity\User;
+
+class Permissions {
+
+    private PermissionsInterface $implementation;
+    private AuthManager $auth;
+
+    public function __construct(PermissionsInterface $implementation, AuthManager $auth) {
+        $this->implementation = $implementation;
+        $this->auth = $auth;
+    }
 
     /**
-     * Permissions Interface;
+     * Check if the user has permissions for the given key.
      *
-     * @var \Oxygen\Auth\Permissions\PermissionsInterface
+     * @param User $user
+     * @param string $key
+     * @return boolean
      */
-    protected $permissionsInterface;
+    public function hasForUser(User $user, string $key): bool {
+        $generator = function() use($user) {
+            $group = $user->getGroup();
+            while($group !== null) {
+                yield $group->getPermissions();
+                $group = $group->getParent();
+            }
+        };
 
-    /**
-     * Decode the permissions and return the array.
-     * Should be called only once when the PermissionsInterface is configured.
-     *
-     * @return array
-     */
-    public function decodePermissions() {
-        return $this->group->getPermissions();
+        return $this->implementation->hasPermissions($generator, $key);
     }
 
     /**
@@ -29,15 +42,8 @@ trait Permissions {
      * @param string $key
      * @return boolean
      */
-    public function hasPermissions($key) {
-        if($this->permissionsInterface === null) {
-            $this->permissionsInterface = resolve(PermissionsInterface::class);
-        }
-
-        if($this->permissionsInterface->needsPermissions()) {
-            $this->permissionsInterface->setPermissions($this->decodePermissions());
-        }
-        return $this->permissionsInterface->hasPermissions($key);
+    public function has(string $key): bool {
+        return $this->hasForUser($this->auth->guard()->user(), $key);
     }
 
 }

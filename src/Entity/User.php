@@ -4,12 +4,15 @@ namespace Oxygen\Auth\Entity;
 
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping AS ORM;
+use Exception;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
+use LaravelDoctrine\ORM\Notifications\Notifiable;
 use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
@@ -21,7 +24,6 @@ use Oxygen\Data\Behaviour\SoftDeletes;
 use Oxygen\Data\Exception\InvalidEntityException;
 use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Authentication;
-use Oxygen\Preferences\Repository;
 use Oxygen\Data\Behaviour\Searchable;
 use Illuminate\Support\Facades\Notification;
 
@@ -33,8 +35,8 @@ use Illuminate\Support\Facades\Notification;
 
 class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable {
 
-    use PrimaryKey, Timestamps, SoftDeletes, Authentication, Permissions, Preferences;
-    use \LaravelDoctrine\ORM\Notifications\Notifiable;
+    use PrimaryKey, Timestamps, SoftDeletes, Authentication, Preferences;
+    use Notifiable;
     use Accessors, Fillable;
 
     use DoctrineTwoFactorAuthentication;
@@ -49,12 +51,10 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      */
     protected $fullName;
 
-    /* protected $email; <--- exists inside the `RememberToken` trait */
-
     /**
-     * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\Group", inversedBy="users", fetch="EAGER", cascade={"persist"})
+     * @ORM\ManyToOne(inversedBy="users", fetch="EAGER", cascade={"persist"})
      */
-    protected $group;
+    protected Group $group;
 
     /**
      * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\AuthenticationLogEntry", mappedBy="user")
@@ -68,20 +68,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      */
     protected $allFillable;
 
-    /**
-     * Returns a new preferences repository from the given preferences.
-     *
-     * @return Repository
-     * @throws \Exception
-     */
-    public function createPreferencesRepository() {
-        $this->createJsonTransformer();
-        $repository = static::$jsonTransformer->toRepository($this->preferences);
-        if($this->group != null) {
-            $repository->addFallbackRepository($this->group->getPreferences());
-        }
-        return $repository;
-    }
 
     /**
      * Sets whether all fields should be fillable.
@@ -121,8 +107,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
                 'max:255'
             ],
             'preferences' => [
-                'required',
-                'json'
             ]
         ];
     }
@@ -136,7 +120,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
         if($this->allFillable) {
             return ['username', 'fullName', 'email', 'preferences', 'group'];
         } else {
-            return ['username', 'fullName', 'email'];
+            return ['fullName'];
         }
     }
 
@@ -183,23 +167,60 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     }
 
     /**
+     * Returns true if this user should be allowed to impersonate other users.
+     *
+     * @return bool
+     */
+    public function canImpersonate(): bool {
+        return app(Permissions::class)->hasForUser($this, 'auth.impersonate');
+    }
+
+    /**
+     * Return true or false if the user can be impersonate.
+     *
+     * @param void
+     * @return bool
+     */
+    public function canBeImpersonated(): bool {
+        return true;
+    }
+
+    /**
+     * Returns a flat set of preferences which have been merged together already.
+     *
+     * @return array
+     */
+    public function getMergedPreferences(): array {
+        $prefs = [$this->getPreferences()];
+        $group = $this->getGroup();
+        while($group !== null) {
+            $prefs[] = $group->getPreferences();
+            $group = $group->getParent();
+        }
+        return array_merge_recursive_distinct(...array_reverse($prefs));
+    }
+
+    /**
      * Converts this model to JSON-equivalent array form suitable for returning from API endpoints.
      *
      * @return array
      */
     public function toArray() {
-        $preferencesRepo = $this->getPreferences();
-
         return [
             'id' => $this->id,
             'username' => $this->username,
             'fullName' => $this->fullName,
             'email' => $this->email,
-            'preferences' => $preferencesRepo->toArray(),
-            'permissions' => $this->group->getPermissions(),
+            'preferences' => $this->getMergedPreferences(),
+            'permissions' => $this->group->getMergedPermissions(),
             'group' => $this->group->toArray(),
-            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(\DateTime::ATOM) : null,
-            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(\DateTime::ATOM) : null
+            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(DateTimeInterface::ATOM) : null,
+            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(DateTimeInterface::ATOM) : null
         ];
     }
+
+    public function getGroup(): Group {
+        return $this->group;
+    }
+
 }

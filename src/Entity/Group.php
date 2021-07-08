@@ -4,6 +4,7 @@ namespace Oxygen\Auth\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping AS ORM;
+use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
@@ -35,20 +36,32 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
     protected $description;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\User", mappedBy="group")
+     */
+    protected $users;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
      */
     protected $permissions;
 
     /**
-     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\User", mappedBy="group")
+     * @ORM\ManyToOne(inversedBy="children", fetch="LAZY", cascade={"persist"})
+     * @ORM\JoinColumn(name="parent_id", nullable=true)
      */
-    protected $users;
+    protected ?Group $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\Group", mappedBy="parent")
+     */
+    protected $children;
 
     /**
      * Constructs the Group.
      */
     public function __construct() {
         $this->users = new ArrayCollection();
+        $this->children = new ArrayCollection();
     }
 
     /**
@@ -64,11 +77,9 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
             ],
             'preferences' => [
                 'required',
-                'json'
             ],
             'permissions' => [
                 'required',
-                'json'
             ]
         ];
     }
@@ -79,7 +90,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * @return array
      */
     public function getFillableFields(): array {
-        return ['name', 'description', 'preferences', 'permissions'];
+        return ['name', 'description', 'preferences', 'permissions', 'parent'];
     }
 
     /**
@@ -89,11 +100,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * @throws \RuntimeException if user permissions couldn't be decoded.
      */
     public function getPermissions() {
-        $res = json_decode($this->permissions, true);
-        if(json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException("Could Not Decode User Permissions: " . json_last_error_msg());
-        }
-        return $res;
+        return $this->permissions;
     }
 
     /**
@@ -103,7 +110,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * @return $this
      */
     public function setPermissions($permissions) {
-        $this->permissions = is_string($permissions) ? $permissions : json_encode($permissions, JSON_PRETTY_PRINT);
+        $this->permissions = $permissions;
         return $this;
     }
 
@@ -127,6 +134,35 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
             'name' => $this->name,
             'description' => $this->description
         ];
+    }
+
+    /**
+     * @return null|Group
+     */
+    public function getParent(): ?Group {
+        return $this->parent;
+    }
+
+    /**
+     * @param null|Group $parent
+     */
+    public function setParent(?Group $parent) {
+        $this->parent = $parent;
+    }
+
+    /**
+     * Returns this Group's permissions, combined with all inherited permissions as well.
+     *
+     * @return array
+     */
+    public function getMergedPermissions(): array {
+        $perms = [];
+        $group = $this;
+        while($group !== null) {
+            $perms[] = $group->getPermissions();
+            $group = $group->getParent();
+        }
+        return array_merge_recursive_distinct(...array_reverse($perms));
     }
 
 }

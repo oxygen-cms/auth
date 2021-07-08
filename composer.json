@@ -14,14 +14,15 @@
         }
     ],
     "require": {
-        "php": ">=7.2.0",
+        "php": ">=7.4",
         "oxygen/core": "~0.10.0",
         "oxygen/data": "~0.10.0",
         "oxygen/preferences": "~0.3.8",
         "illuminate/support": "~6.0",
         "darkghosthunter/laraguard": "dev-master",
         "ext-json": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "lab404/laravel-impersonate": "^1.7"
     },
     "autoload": {
         "psr-4": {

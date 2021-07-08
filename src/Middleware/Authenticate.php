@@ -53,8 +53,8 @@ class Authenticate {
         $this->url = $generator;
         $this->coreConfig = $coreConfig;
     }
-    
-    private function isPartOfApi($path) {
+
+    private function isPartOfApi($path): bool {
         return Str::startsWith($path, 'oxygen/api');
     }
 

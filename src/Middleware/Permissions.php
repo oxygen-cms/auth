@@ -4,59 +4,57 @@ namespace Oxygen\Auth\Middleware;
 
 use Closure;
 use Illuminate\Auth\AuthManager;
-use Oxygen\Auth\Entity\User;
+use Illuminate\Http\Request;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Core\Translation\Translator;
+use Oxygen\Preferences\PreferenceNotFoundException;
 use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Auth\Permissions\Permissions as PermissionsService;
 
 class Permissions {
 
     /**
-     * @var \Illuminate\Contracts\Auth\Guard
-     */
-    private $auth;
-
-    /**
-     * @var \Oxygen\Core\Contracts\Routing\ResponseFactory
+     * @var ResponseFactory
      */
     private $response;
 
     /**
-     * @var \Oxygen\Core\Translation\Translator
+     * @var Translator
      */
     private $lang;
 
     /**
-     * @var \Oxygen\Preferences\PreferencesManager
+     * @var PreferencesManager
      */
     private $preferences;
 
+    private PermissionsService $permissions;
+
     /**
      * @param AuthManager $auth
-     * @param \Oxygen\Core\Contracts\Routing\ResponseFactory $response
-     * @param \Oxygen\Core\Translation\Translator $lang
-     * @param \Oxygen\Preferences\PreferencesManager $preferences
+     * @param ResponseFactory $response
+     * @param Translator $lang
+     * @param PreferencesManager $preferences
      */
-    public function __construct(AuthManager $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
-        $this->auth = $auth;
+    public function __construct(ResponseFactory $response, Translator $lang, PreferencesManager $preferences, PermissionsService $permissions) {
         $this->response = $response;
         $this->lang = $lang;
         $this->preferences = $preferences;
+        $this->permissions = $permissions;
     }
 
     /**
      * Run the request filter.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @param string $permission
      * @return mixed
-     * @throws \Oxygen\Preferences\PreferenceNotFoundException
+     * @throws PreferenceNotFoundException
      */
-    public function handle($request, Closure $next, $permission) {
-        $user = $this->auth->guard()->user();
-        if(!($user instanceof User) || !$user->hasPermissions($permission)) {
+    public function handle(Request $request, Closure $next, string $permission) {
+        if(!$this->permissions->has($permission)) {
             $notification = new Notification(
                 $this->lang->get('oxygen/auth::messages.permissions.noPermissions', ['permission' => $permission]),
                 Notification::FAILED
