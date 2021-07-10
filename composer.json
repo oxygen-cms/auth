@@ -15,9 +15,9 @@
     ],
     "require": {
         "php": ">=7.4",
-        "oxygen/core": "~0.10.0",
-        "oxygen/data": "~0.10.0",
-        "oxygen/preferences": "~0.3.8",
+        "oxygen/core": "~0.11.0",
+        "oxygen/data": "~0.11.0",
+        "oxygen/preferences": "~0.4.0",
         "illuminate/support": "~6.0",
         "darkghosthunter/laraguard": "dev-master",
         "ext-json": "*",
@@ -39,7 +39,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.2.15"
+            "php": "7.4.0"
         }
     },
     "repositories": [
