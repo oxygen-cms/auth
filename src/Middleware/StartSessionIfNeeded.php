@@ -21,7 +21,7 @@ class StartSessionIfNeeded extends StartSession {
         if (!app('auth')->guard()->check()) {
             return;
         }
-        $this->addCookieToResponse($response, $session);
+        parent::addCookieToResponse($response, $session);
     }
 
 }
