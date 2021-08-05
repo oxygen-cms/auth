@@ -4,12 +4,13 @@ namespace Oxygen\Auth\Preferences;
 
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Arr;
-use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
+use Oxygen\Data\Exception\InvalidEntityException;
 use Oxygen\Preferences\ChainedStore;
 use Oxygen\Preferences\Loader\LoaderInterface;
+use Oxygen\Preferences\PreferencesSettingInterface;
 
-class UserLoader implements LoaderInterface {
+class UserLoader implements LoaderInterface, PreferencesSettingInterface {
 
     /**
      * User repository.
@@ -17,7 +18,6 @@ class UserLoader implements LoaderInterface {
      * @var UserRepositoryInterface
      */
     protected $users;
-
 
     /**
      * @var null|ChainedStore
@@ -60,7 +60,7 @@ class UserLoader implements LoaderInterface {
                 }
             };
 
-            $this->preferencesRepository = new ChainedStore($chain);
+            $this->preferencesRepository = new ChainedStore($chain, $this);
         }
         return $this->preferencesRepository;
     }
@@ -69,19 +69,24 @@ class UserLoader implements LoaderInterface {
      * Stores the preferences in the database.
      *
      * @return void
+     * @throws InvalidEntityException
      */
     public function store() {
-        if($this->preferencesRepository !== null) {
-            $user = $this->auth->user();
-
-            $original = Arr::get($user->getPreferences(), $this->prefix, []);
-            $changed = $this->preferencesRepository->getChangedArray();
-            $new = array_merge_recursive_distinct($original, $changed);
-            $prefs = $user->getPreferences();
-            Arr::set($prefs, $this->prefix, $new);
-            $user->setPreferences($prefs);
-            $this->users->persist($user);
-        }
+        $user = $this->auth->user();
+        $this->users->persist($user);
     }
 
+    /**
+     * Sets the preferences value.
+     *
+     * @param string $key
+     * @param $value
+     * @return void
+     */
+    public function set(string $key, $value) {
+        $user = $this->auth->user();
+        $prefs = $user->getPreferences();
+        Arr::set($prefs, ltrim($this->prefix . '.' . $key, '.'), $value);
+        $user->setPreferences($prefs);
+    }
 }

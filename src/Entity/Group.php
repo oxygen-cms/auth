@@ -162,7 +162,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
             $perms[] = $group->getPermissions();
             $group = $group->getParent();
         }
-        return array_merge_recursive_distinct(...array_reverse($perms));
+        return array_merge_recursive_ignore_null(...array_reverse($perms));
     }
 
 }

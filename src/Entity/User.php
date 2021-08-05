@@ -197,7 +197,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
             $prefs[] = $group->getPreferences();
             $group = $group->getParent();
         }
-        return array_merge_recursive_distinct(...array_reverse($prefs));
+        return array_merge_recursive_ignore_null(...array_reverse($prefs));
     }
 
     /**
