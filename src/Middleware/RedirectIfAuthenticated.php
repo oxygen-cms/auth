@@ -16,22 +16,22 @@ class RedirectIfAuthenticated {
     /**
      * @var AuthManager
      */
-    private $auth;
+    private AuthManager $auth;
 
     /**
      * @var ResponseFactory
      */
-    private $response;
+    private ResponseFactory $response;
 
     /**
      * @var Translator
      */
-    private $lang;
+    private Translator $lang;
 
     /**
      * @var PreferencesManager
      */
-    private $preferences;
+    private PreferencesManager $preferences;
 
     public function __construct(AuthManager $auth, ResponseFactory $response, Translator $lang, PreferencesManager $preferences) {
         $this->auth = $auth;
