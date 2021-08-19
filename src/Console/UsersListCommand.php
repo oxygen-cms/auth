@@ -20,7 +20,7 @@ class UsersListCommand extends Command {
      *
      * @var string
      */
-    protected $description = 'Send drip e-mails to a user';
+    protected $description = 'List all registered users of the application';
 
     private $headers = [
         'Id',
