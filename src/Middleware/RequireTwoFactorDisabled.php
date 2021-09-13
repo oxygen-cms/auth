@@ -7,6 +7,9 @@
 namespace Oxygen\Auth\Middleware;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -17,22 +20,22 @@ class RequireTwoFactorDisabled {
     /**
      * Current User authenticated.
      *
-     * @var \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable|null
+     * @var Authenticatable|TwoFactorAuthenticatable|null
      */
     protected $user;
 
     /**
      * Response Factory.
      *
-     * @var \Illuminate\Contracts\Routing\ResponseFactory
+     * @var ResponseFactory
      */
     protected $response;
 
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
-     * @param  \Illuminate\Contracts\Routing\ResponseFactory  $response
+     * @param Authenticatable|null  $user
+     * @param ResponseFactory $response
      */
     public function __construct(ResponseFactory $response, Authenticatable $user = null) {
         $this->response = $response;
@@ -42,10 +45,10 @@ class RequireTwoFactorDisabled {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
+     * @param Closure $next
      * @param  string  $redirectToRoute
-     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|mixed
+     * @return JsonResponse|RedirectResponse|mixed
      */
     public function handle($request, Closure $next, $redirectToRoute = null) {
         if ($this->user->hasTwoFactorEnabled()) {

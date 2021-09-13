@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Oxygen\Core\Http\Notification;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 
@@ -18,22 +19,22 @@ class RequireTwoFactorEnabled {
     /**
      * Current User authenticated.
      *
-     * @var \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable|null
+     * @var Authenticatable|TwoFactorAuthenticatable|null
      */
     protected $user;
 
     /**
      * Response Factory.
      *
-     * @var \Illuminate\Contracts\Routing\ResponseFactory
+     * @var ResponseFactory
      */
     protected $response;
 
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Auth\Authenticatable|null  $user
-     * @param  \Illuminate\Contracts\Routing\ResponseFactory  $response
+     * @param Authenticatable|null  $user
+     * @param ResponseFactory $response
      */
     public function __construct(ResponseFactory $response, Authenticatable $user = null) {
         $this->response = $response;
@@ -43,13 +44,13 @@ class RequireTwoFactorEnabled {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
+     * @param Closure $next
      * @param  string  $redirectToRoute
      * @return JsonResponse|RedirectResponse|mixed
      */
     public function handle($request, Closure $next, $redirectToRoute = '2fa.notice') {
-        if (!$this->user->hasTwoFactorEnabled()) {
+        if(!$this->user->hasTwoFactorEnabled()) {
             return $this->response->notification(
                 new Notification(trans('laraguard::messages.enable'), Notification::INFO),
                 ['redirect' => $redirectToRoute]

@@ -5,6 +5,9 @@ namespace Oxygen\Auth;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Validated;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Routing\Router;
 use Oxygen\Auth\Console\MakeGroupCommand;
 use Oxygen\Auth\Console\MakeUserCommand;
@@ -25,6 +28,8 @@ use Oxygen\Auth\Repository\DoctrineUserRepository;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\BaseServiceProvider;
+use Oxygen\Preferences\PreferencesManager;
+use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
 
 class AuthServiceProvider extends BaseServiceProvider {
 
@@ -33,7 +38,8 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 *
 	 * @return void
 	 */
-	public function boot(Router $router) {
+	public function boot(Router $router, Dispatcher $dispatcher) {
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'oxygen.auth');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
 
         $this->publishes([
@@ -41,7 +47,9 @@ class AuthServiceProvider extends BaseServiceProvider {
         ]);
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'oxygen/auth');
 
-		$router->aliasMiddleware('oxygen.auth', Authenticate::class);
+        $this->loadRoutesFrom(__DIR__ . '/../resources/routes.php');
+
+        $router->aliasMiddleware('oxygen.auth', Authenticate::class);
         $router->aliasMiddleware('oxygen.guest', RedirectIfAuthenticated::class);
         $router->aliasMiddleware('oxygen.permissions', Permissions::class);
         $router->aliasMiddleware('2fa.require', RequireTwoFactorEnabled::class);
@@ -52,9 +60,34 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->commands(MakeGroupCommand::class);
         $this->commands(UsersListCommand::class);
 
-        $this->app['events']->listen(Login::class, LogAuthentications::class);
-        $this->app['events']->listen(Logout::class, LogAuthentications::class);
-        $this->app['events']->listen(Failed::class, LogAuthentications::class);
+        $this->app[PreferencesManager::class]->loadDirectory(__DIR__ . '/../resources/preferences');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
+
+        $dispatcher->listen(Login::class, LogAuthentications::class);
+        $dispatcher->listen(Logout::class, LogAuthentications::class);
+        $dispatcher->listen(Failed::class, LogAuthentications::class);
+
+        $dispatcher->listen(Validated::class, function(Validated $event) {
+            if(!$event->user->hasTwoFactorEnabled()) {
+                return;
+            }
+
+            $request = app('request');
+            $code = $request->input(config('laraguard.input'));
+            $validator = validator([
+                'code' => $code
+            ], [
+                'code' => ['required', new TotpCodeRule($event->user)]
+            ]);
+
+            if($validator->fails()) {
+                throw new HttpResponseException(response()->json([
+                    'code' => 'two_factor_auth_failed'
+                ], 401));
+            }
+
+            $request->session()->put('2fa.totp_confirmed_at', now()->timestamp);
+        });
 	}
 
 	/**
