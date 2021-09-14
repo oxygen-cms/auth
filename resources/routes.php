@@ -1,64 +1,78 @@
 <?php
 
-Route::middleware(['api'])->group(function () {
+use Illuminate\Routing\Router;
+use Oxygen\Auth\Controller\AuthController;
+use Oxygen\Auth\Controller\AuthenticationLogController;
+use Oxygen\Auth\Controller\EmailVerificationController;
+use Oxygen\Auth\Controller\PasswordController;
+use Oxygen\Auth\Controller\UsersController;
 
-    Route::post('/oxygen/api/auth/login', '\Oxygen\Auth\Controller\AuthController@postLogin')
+Route::prefix('/oxygen/api')->middleware(['api'])->group(function(Router $router) {
+
+    $router->post('auth/login',  [AuthController::class, 'postLogin'])
         ->name('auth.postLogin');
 
-    // TODO: this should be redundant once all non-API routes are gone from Oxygen
-    Route::get('/oxygen/auth/2fa-setup', [\App\Http\Controllers\AdminController::class, 'getView'])
-        ->name('2fa.notice');
-
-    Route::get('/oxygen/dashboard', [\App\Http\Controllers\AdminController::class, 'getView'])
-        ->name('dashboard.main');
-
-    Route::get('/oxygen/auth/reset-password', [\App\Http\Controllers\AdminController::class, 'getView'])
-        ->name('password.reset');
-
-    Route::post('/oxygen/api/auth/send-reminder-email', '\Oxygen\Auth\Controller\PasswordController@postRemind')
+    $router->post('auth/send-reminder-email', [PasswordController::class, 'postRemind'])
         ->name('password.postRemind')
         ->middleware(['oxygen.guest']);
 
-//        ->makeAction([
-//        'name' => 'postRemind',
-//        'pattern' => 'remind',
-//        'method' => 'POST',
-//        'middleware' => ['web', 'oxygen.guest']
-//    ], $factory);
+    $router->post('auth/reset-password', [PasswordController::class, 'postReset'])
+        ->name('password.postReset')
+        ->middleware(['oxygen.guest']);
 
-    Route::post('/oxygen/api/auth/two-factor-setup', '\Oxygen\Auth\Controller\AuthController@postPrepareTwoFactor')
+    $router->post('auth/two-factor-setup', [AuthController::class, 'postPrepareTwoFactor'])
         ->name('auth.postPrepareTwoFactor')
-        ->middleware(['oxygen.auth:sanctum', '2fa.disabled']);
+        ->middleware(['auth:sanctum', '2fa.disabled']);
 
-    Route::post('/oxygen/api/auth/two-factor-confirm', '\Oxygen\Auth\Controller\AuthController@postConfirmTwoFactor')
+    $router->post('auth/two-factor-confirm', [AuthController::class, 'postConfirmTwoFactor'])
         ->name('auth.postConfirmTwoFactor')
-        ->middleware(['oxygen.auth:sanctum', '2fa.disabled']);
+        ->middleware(['auth:sanctum', '2fa.disabled']);
 
-    Route::middleware(['oxygen.auth:sanctum', '2fa.require'])->group(function() {
-        Route::post('/oxygen/api/auth/logout', '\Oxygen\Auth\Controller\AuthController@postLogout')
-            ->name('auth.postLogout');
+    $router->post('auth/verify-email', [EmailVerificationController::class, 'sendNotification'])
+        ->name('auth.sendVerifyEmail')
+        ->middleware(['auth:sanctum', '2fa.require', 'throttle:6,1']);
+});
 
-        Route::post('/oxygen/api/auth/login-log-entries', '\Oxygen\Auth\Controller\AuthController@getAuthenticationLogEntries')
-            ->name('auth.getAuthenticationLogEntries')
-            ->middleware('oxygen.permissions:auth.getAuthenticationLogEntries');
+Route::get('/oxygen/verify-email', [EmailVerificationController::class, 'verify'])
+    ->name('verification.verify')
+    ->middleware(['web', 'auth', 'signed']);
 
-        Route::post('/oxygen/api/auth/ip-location/{ip}', '\Oxygen\Auth\Controller\AuthController@getIPGeolocation')
-            ->name('auth.getIPGeolocation')
-            ->middleware('oxygen.permissions:auth.getAuthenticationLogEntries');
+Route::prefix('/oxygen/api/auth')->middleware('api_auth')->group(function(Router $router) {
+    $router->post('logout', [AuthController::class, 'postLogout'])
+        ->name('auth.postLogout');
 
-        Route::put('/oxygen/api/auth/fullName', '\Oxygen\Auth\Controller\AuthController@putUpdateFullName')
-            ->name('auth.putUpdateFullName')
-            ->middleware('oxygen.permissions:auth.putUpdate');
+    $router->post('login-log-entries', [AuthenticationLogController::class, 'getAuthenticationLogEntries'])
+        ->name('auth.getAuthenticationLogEntries')
+        ->middleware('oxygen.permissions:auth.getAuthenticationLogEntries');
 
-        Route::post('/oxygen/api/auth/change-password', '\Oxygen\Auth\Controller\AuthController@postChangePassword')
-            ->name('auth.postChangePassword')
-            ->middleware(['oxygen.permissions:auth.postChangePassword']);
+    $router->get('sessions', [AuthenticationLogController::class, 'getUserSessions'])
+        ->name('auth.getUserSessions')
+        ->middleware('oxygen.permissions:auth.getUserSessions');
 
-        Route::post('/oxygen/api/auth/terminate-account', '\Oxygen\Auth\Controller\AuthController@deleteForce')
-            ->name('auth.deleteForce')
-            ->middleware(['oxygen.permissions:auth.deleteForce']);
-    });
+    $router->delete('sessions/{sessionId}', [AuthenticationLogController::class, 'deleteUserSession'])
+        ->name('auth.deleteUserSession')
+        ->middleware('oxygen.permissions:auth.getUserSessions');
 
+    $router->post('ip-location/{ip}', [AuthenticationLogController::class, 'getIPGeolocation'])
+        ->name('auth.getIPGeolocation')
+        ->middleware('oxygen.permissions:auth.getAuthenticationLogEntries');
+
+    $router->put('fullName', [AuthController::class, 'putUpdateFullName'])
+        ->name('auth.putUpdateFullName')
+        ->middleware('oxygen.permissions:auth.putUpdate');
+
+    $router->post('change-password', [AuthController::class, 'postChangePassword'])
+        ->name('auth.postChangePassword')
+        ->middleware(['oxygen.permissions:auth.postChangePassword']);
+
+    $router->post('terminate-account', [AuthController::class, 'deleteForce'])
+        ->name('auth.deleteForce')
+        ->middleware(['oxygen.permissions:auth.deleteForce']);
+});
+
+Route::prefix('/oxygen/api/users')->middleware('api_auth')->group(function(Router $router) {
+    UsersController::registerCrudRoutes($router);
+    UsersController::registerSoftDeleteRoutes($router);
 });
 
 

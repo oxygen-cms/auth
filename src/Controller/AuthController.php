@@ -35,8 +35,6 @@ class AuthController extends Controller {
     use Confirms2FACode;
     use ThrottlesLogins;
 
-    const AUTHENTICATION_LOG_PER_PAGE = 10;
-
     private UserRepositoryInterface $repository;
 
     /**
@@ -46,19 +44,6 @@ class AuthController extends Controller {
      */
     public function __construct(UserRepositoryInterface $repository) {
         $this->repository = $repository;
-    }
-
-    /**
-     * Show the login form.
-     *
-     * @param Request $request
-     * @return View
-     */
-    public function getLogin(Request $request) {
-        if($request->has('intended')) {
-            $request->session()->put('url.intended', $request->get('intended'));
-        }
-        return view('oxygen/mod-auth::login');
     }
 
     /**
@@ -76,8 +61,7 @@ class AuthController extends Controller {
      *
      * @param Request $request
      * @param AuthManager $auth
-     * @return Response
-     * @throws PreferenceNotFoundException
+     * @return JsonResponse
      * @throws ValidationException
      */
     public function postLogin(Request $request, AuthManager $auth) {
@@ -91,7 +75,7 @@ class AuthController extends Controller {
         $username = $request->get('username', null);
         if($username === '' || $username === null) {
             return response()->json([
-                'code' => 'incorrect_username_password'
+                'code' => 'no_username'
             ], 401);
         }
 
@@ -124,6 +108,10 @@ class AuthController extends Controller {
         }
     }
 
+    /**
+     * @param Guard $guard
+     * @return JsonResponse
+     */
     public function makeAuthenticatedLoginResponse(Guard $guard) {
         return response()->json([
             'user' => $guard->user()->toArray()
@@ -134,7 +122,7 @@ class AuthController extends Controller {
      * Begins to set-up two-factor authentication for this user.
      *
      * @param Request $request
-     * @return Application|\Illuminate\Contracts\View\Factory|View
+     * @return JsonResponse
      */
     public function postPrepareTwoFactor(Request $request) {
         $secret = $request->user()->createTwoFactorAuth();
@@ -151,7 +139,7 @@ class AuthController extends Controller {
      *
      * @param Request $request
      * @param PreferencesManager $preferences
-     * @return Response
+     * @return JsonResponse
      */
     public function postConfirmTwoFactor(Request $request, PreferencesManager $preferences) {
         $code = str_replace(' ', '', $request->input('2fa_code'));
@@ -174,70 +162,17 @@ class AuthController extends Controller {
      * Log the user out.
      *
      * @param AuthManager $auth
-     * @param SessionManager $session
-     * @param Dispatcher $events
+     * @param Request $request
      * @return mixed
      */
-    public function postLogout(AuthManager $auth, SessionManager $session, Dispatcher $events) {
+    public function postLogout(AuthManager $auth, Request $request) {
         $user = $auth->guard('web')->user();
         $auth->guard('web')->logout();
-        // NOTE: flushing session on logout appears to fix a subtle bug where
-        // logging out from one user, then attempting to login again,
-        // would error out and cause a HTTP 403 error to be returned (when using two factor auth)
-        // see: Illuminate\Session\Middleware\AuthenticateSession line 55
-        // $session->flush();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->noContent();
-    }
-
-    /**
-     * Show the logout success message.
-     *
-     * @return View
-     */
-    public function getLogoutSuccess() {
-        return view('oxygen/mod-auth::logout', [
-            'title' => __('oxygen/mod-auth::ui.logout.title')
-        ]);
-    }
-
-    /**
-     * Get entries from the login log.
-     *
-     * @param AuthenticationLogEntryRepositoryInterface $entries
-     * @return JsonResponse
-     */
-    public function getAuthenticationLogEntries(AuthenticationLogEntryRepositoryInterface $entries) {
-        $paginator = $entries->findByUser(auth()->user(), self::AUTHENTICATION_LOG_PER_PAGE);
-
-        return response()->json([
-            'items' => array_map(function(AuthenticationLogEntry $e) { return $e->toArray(); }, $paginator->items()),
-            'totalItems' => $paginator->total(),
-            'itemsPerPage' => $paginator->perPage(),
-            'status' => Notification::SUCCESS
-        ]);
-    }
-
-    /**
-     * Returns filled in IP geolocation data from a geolocation service.
-     * @param string $ip
-     * @return Application|ResponseFactory|JsonResponse|Response
-     */
-    public function getIPGeolocation(string $ip) {
-        $client = new Client();
-
-        try {
-            $res = $client->request('GET', config('oxygen.auth.ipGeolocationUrl'), [
-                'query' => ['apiKey' => config('oxygen.auth.ipGeolocationKey'), 'ip' => $ip]
-            ]);
-            return response($res->getBody());
-        } catch(ClientException $e) {
-            report($e);
-            return response()->json([
-                'content' => 'IP geolocation failed',
-                'status' => Notification::FAILED
-            ]);
-        }
     }
 
     /**

@@ -51,46 +51,21 @@ class PasswordController extends Controller {
                 );
         }
     }
-//
-//    /**
-//     * Display the password reset view for the given token.
-//     *
-//     * @return View
-//     */
-//    public function reset(Request $request) {
-//        if(!$request->has('token')) {
-//            abort(404);
-//        }
-//
-//        return view('oxygen/mod-auth::password.reset', [
-//            'token' => $request->input('token')
-//        ]);
-//    }
 
     /**
      * Handle a POST request to reset a user's password.
      *
      * @param Request $request
      * @param PasswordBroker $password
-     * @param Factory $validationFactory
      * @return Response
      * @throws BlueprintNotFoundException
      */
-    public function postReset(Request $request, PasswordBroker $password, Factory $validationFactory) {
-        $validator = $validationFactory->make(
-            $request->all(),
-            [
-                'token' => 'required',
-                'email' => 'required|email',
-                'password' => 'required|confirmed'
-            ]
-        );
-
-        if(!$validator->passes()) {
-            return notify(
-                new Notification($validator->messages()->first(), Notification::FAILED)
-            );
-        }
+    public function postReset(Request $request, PasswordBroker $password) {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|confirmed'
+        ]);
 
         $credentials = $request->only(
             'email', 'password', 'password_confirmation', 'token'
@@ -103,14 +78,16 @@ class PasswordController extends Controller {
 
         switch ($response) {
             case PasswordBroker::PASSWORD_RESET:
-                return notify(
-                    new Notification(__($response), Notification::SUCCESS),
-                    ['redirect' => $this->blueprintManager->get('Auth')->getRouteName('getLogin'), 'hardRedirect' => true]
-                );
+                return response()->json([
+                    'content' => __($response),
+                    'status' => 'success'
+                ]);
             default:
-                return notify(
-                    new Notification(__($response), Notification::FAILED)
-                );
+                return response()->json([
+                    'code' => 'reset_failed',
+                    'content' => __($response),
+                    'status' => 'failed'
+                ], 422);
         }
     }
 

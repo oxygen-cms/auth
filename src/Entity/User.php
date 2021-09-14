@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
 use LaravelDoctrine\ORM\Notifications\Notifiable;
@@ -26,18 +27,20 @@ use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Authentication;
 use Oxygen\Data\Behaviour\Searchable;
 use Illuminate\Support\Facades\Notification;
+use DateTime;
+use Illuminate\Auth\Notifications\VerifyEmail;
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="users")
  * @ORM\HasLifecycleCallbacks
  */
-
-class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable {
+class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Preferences;
     use Notifiable;
     use Accessors, Fillable;
+    use Notifiable;
 
     use DoctrineTwoFactorAuthentication;
 
@@ -62,12 +65,17 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     protected $authenticationLogEntries;
 
     /**
+     * @ORM\Column(name="email_verified_at", type="datetime", nullable=true)
+     * @var DateTimeInterface
+     */
+    protected $verifiedAt;
+
+    /**
      * True if all fields should be fillable (only for Administrators)
      *
      * @var boolean
      */
     protected $allFillable;
-
 
     /**
      * Sets whether all fields should be fillable.
@@ -221,6 +229,52 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
 
     public function getGroup(): Group {
         return $this->group;
+    }
+
+    /**
+     * Determine if the user has verified their email address.
+     *
+     * @return bool
+     */
+    public function hasVerifiedEmail() {
+        return $this->verifiedAt !== null && $this->verifiedAt < new DateTime();
+    }
+
+    /**
+     * Mark the given user's email as verified.
+     *
+     * @return bool
+     */
+    public function markEmailAsVerified() {
+        $this->verifiedAt = new DateTime();
+        return true;
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification() {
+        $this->notify(new VerifyEmail());
+    }
+
+    /**
+     * Get the email address that should be used for verification.
+     *
+     * @return string
+     */
+    public function getEmailForVerification() {
+        return $this->email;
+    }
+
+    /**
+     * Required for email verification notifications
+     *
+     * @return int
+     */
+    public function getKey() {
+        return $this->getId();
     }
 
 }

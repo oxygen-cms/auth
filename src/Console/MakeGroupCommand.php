@@ -18,7 +18,7 @@ class MakeGroupCommand extends Command {
      * @var string
      */
 
-    protected $name = 'make:group';
+    protected $name = 'group:add';
 
     /**
      * The console command description.

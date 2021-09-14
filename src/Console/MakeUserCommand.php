@@ -19,7 +19,7 @@ class MakeUserCommand extends Command {
 	 * @var string
 	 */
 
-	protected $name = 'make:user';
+	protected $name = 'user:add';
 
 	/**
 	 * The console command description.
@@ -27,7 +27,7 @@ class MakeUserCommand extends Command {
 	 * @var string
 	 */
 
-	protected $description = 'Creates a new user.';
+	protected $description = 'Adds a new user to the system.';
 
 	/**
 	 * Execute the console command.
@@ -65,7 +65,7 @@ class MakeUserCommand extends Command {
 		$group = $mappedGroups[$this->choice('Group', $groupNames)];
 
 		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
-		
+
 		try {
 			$item = $users->make();
 			$item->setAllFillable(true);

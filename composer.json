@@ -33,7 +33,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Oxygen\\Auth\\AuthServiceProvider"
+                "Oxygen\\Auth\\AuthServiceProvider",
+                "Oxygen\\Auth\\Session\\DoctrineSessionServiceProvider"
             ]
         }
     },

@@ -13,7 +13,7 @@ class UsersListCommand extends Command {
     /**
      * @var string name and signature of console command
      */
-    protected $signature = 'users:list ';
+    protected $signature = 'user:list';
 
     /**
      * The console command description.
@@ -55,15 +55,14 @@ class UsersListCommand extends Command {
                 'username' => $user->getUsername(),
                 'fullName' => $user->getFullName(),
                 'email' => $user->getEmail(),
-//                'preferences' => json_encode($user->getPreferences()->toArray()),
-//                'permissions' => json_encode($user->getGroup()->getPermissions()),
-                'group' => json_encode($user->getGroup()->toArray()),
+                'group' => $user->getGroup()->getName() . ' - ' . $user->getGroup()->getDescription(),
                 'createdAt' => $user->getCreatedAt() !== null ? $user->getCreatedAt()->format(\DateTime::ATOM) : null,
                 'updatedAt' => $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format(\DateTime::ATOM) : null
             ];
         }, $users);
 
         $generalTable = new Table($this->output);
+        $generalTable->setStyle('box-double');
         $generalTable->setHeaders($this->headers);
         $generalTable->setRows($usersRows);
         $generalTable->render();

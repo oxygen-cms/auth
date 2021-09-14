@@ -15,6 +15,7 @@ use Oxygen\Auth\Console\UsersListCommand;
 use Oxygen\Auth\Listeners\LogAuthentications;
 use Oxygen\Auth\Middleware\Authenticate;
 use Oxygen\Auth\Middleware\ConfirmTwoFactorCode;
+use Oxygen\Auth\Middleware\EnsureEmailIsVerified;
 use Oxygen\Auth\Middleware\Permissions;
 use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
 use Oxygen\Auth\Middleware\RequireTwoFactorDisabled;
@@ -49,7 +50,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 
         $this->loadRoutesFrom(__DIR__ . '/../resources/routes.php');
 
-        $router->aliasMiddleware('oxygen.auth', Authenticate::class);
+        $router->aliasMiddleware('verified', EnsureEmailIsVerified::class);
         $router->aliasMiddleware('oxygen.guest', RedirectIfAuthenticated::class);
         $router->aliasMiddleware('oxygen.permissions', Permissions::class);
         $router->aliasMiddleware('2fa.require', RequireTwoFactorEnabled::class);
