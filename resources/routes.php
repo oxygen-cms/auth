@@ -73,6 +73,13 @@ Route::prefix('/oxygen/api/auth')->middleware('api_auth')->group(function(Router
 Route::prefix('/oxygen/api/users')->middleware('api_auth')->group(function(Router $router) {
     UsersController::registerCrudRoutes($router);
     UsersController::registerSoftDeleteRoutes($router);
+
+    $router->post('{id}/impersonate', [UsersController::class, 'postImpersonate'])
+        ->name('users.postImpersonate')
+        ->middleware('oxygen.permissions:users.postImpersonate');
+
+    $router->post('stop-impersonating', [UsersController::class, 'postLeaveImpersonate'])
+        ->name('users.postLeaveImpersonate');
 });
 
 

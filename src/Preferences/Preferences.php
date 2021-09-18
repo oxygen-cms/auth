@@ -16,7 +16,7 @@ trait Preferences {
      * @return array
      */
     public function getPreferences(): array {
-        return $this->preferences;
+        return $this->preferences === null ? [] : $this->preferences;
     }
 
     /**

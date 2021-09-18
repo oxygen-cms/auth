@@ -2,21 +2,27 @@
 
 namespace Oxygen\Auth\Controller;
 
+use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Lab404\Impersonate\Services\ImpersonateManager;
+use Oxygen\Auth\Entity\User;
 use Oxygen\Core\Controller\Controller;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Crud\Controller\BasicCrudApi;
-use Oxygen\Crud\Controller\SoftDeleteCrudApi;th
+use Oxygen\Crud\Controller\SoftDeleteCrudApi;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 
 class UsersController extends Controller {
 
     use BasicCrudApi, SoftDeleteCrudApi {
         SoftDeleteCrudApi::deleteDeleteApi insteadof BasicCrudApi;
-        SoftDeleteCrudApi::getListQueryParameters insteadof BasicCrudApi;
+        // we don't care about filtering by deleted status here
+        BasicCrudApi::getListQueryParameters insteadof SoftDeleteCrudApi;
     }
+
+    const PER_PAGE = 50;
 
     const LANG_MAPPINGS = [
         'resource' => 'User',
@@ -101,42 +107,48 @@ class UsersController extends Controller {
     /**
      * Logs in as the specified user.
      *
-     * @param $id
+     * @param int $otherUser
      * @param Guard $auth
      * @param ImpersonateManager $manager
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function postImpersonate($id, Guard $auth, ImpersonateManager $manager) {
-        $otherUser = $this->getItem($id);
+    public function postImpersonate($otherUser, Guard $auth, ImpersonateManager $manager) {
+        $otherUser = $this->repository->find($otherUser);
         if($auth->user() === $otherUser) {
-            return notify(
-                new Notification(__('oxygen/mod-auth::messages.cannotImpersonateSameUser'), Notification::FAILED),
-            );
+            return response()->json(['content' => __('oxygen/auth::messages.cannotImpersonateSameUser'), 'status' => 'failed'], 400);
         }
-        $manager->take($auth->user(), $otherUser);
-        return notify(
-            new Notification(__('oxygen/mod-auth::messages.impersonated', ['name' => $otherUser->getFullName()])),
-            ['redirect' => 'dashboard.main', 'hardRedirect' => true]
-        );
+        // we force the use of the `web` guard, otherwise the impersonation doesn't persist across requests for some reason
+        $manager->take($auth->user(), $otherUser, 'web');
+        return response()->json([
+            'content' => __('oxygen/auth::messages.impersonated', ['name' => $otherUser->getFullName()]),
+            'user' => $otherUser->toArray(),
+            'impersonating' => true,
+            'status' => 'success'
+        ]);
     }
 
     /**
-     * @param Guard $auth
+     * @param AuthManager $auth
      * @param ImpersonateManager $manager
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function postLeaveImpersonate(Guard $auth, ImpersonateManager $manager) {
+    public function postLeaveImpersonate(AuthManager $auth, ImpersonateManager $manager) {
         if($manager->isImpersonating()) {
             $manager->leave();
 
-            return notify(
-                new Notification(__('oxygen/mod-auth::messages.impersonationStopped', ['name' => $auth->user()->getFullName()])),
-                ['refresh' => true]
-            );
+            $user = $auth->guard('web')->user();
+            return response()->json([
+                'content' => __('oxygen/auth::messages.impersonationStopped', ['name' => $user->getFullName()]),
+                'status' => 'success',
+                'user' => $user->toArray(),
+                'impersonating' => false
+            ]);
         } else {
-            return notify(
-                new Notification(__('oxygen/mod-auth::messages.notImpersonating'), Notification::FAILED),
-            );
+            return response()->json([
+                'content' => __('oxygen/auth::messages.notImpersonating'),
+                'status' => 'failed',
+                'code' => 'not_impersonating'
+            ], 400);
         }
 
 

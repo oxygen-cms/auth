@@ -32,10 +32,10 @@ class Permissions {
     private PermissionsService $permissions;
 
     /**
-     * @param AuthManager $auth
      * @param ResponseFactory $response
      * @param Translator $lang
      * @param PreferencesManager $preferences
+     * @param PermissionsService $permissions
      */
     public function __construct(ResponseFactory $response, Translator $lang, PreferencesManager $preferences, PermissionsService $permissions) {
         $this->response = $response;

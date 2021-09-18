@@ -17,12 +17,12 @@ class UserLoader implements LoaderInterface, PreferencesSettingInterface {
      *
      * @var UserRepositoryInterface
      */
-    protected $users;
+    protected UserRepositoryInterface $users;
 
     /**
      * @var null|ChainedStore
      */
-    private $preferencesRepository;
+    private ?ChainedStore $preferencesRepository;
 
     private Guard $auth;
     private ?string $prefix;

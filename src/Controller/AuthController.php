@@ -3,13 +3,8 @@
 namespace Oxygen\Auth\Controller;
 
 use DarkGhostHunter\Laraguard\Http\Controllers\Confirms2FACode;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Events\Dispatcher;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,12 +14,9 @@ use Illuminate\Session\SessionManager;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use Oxygen\Auth\Entity\AuthenticationLogEntry;
-use Oxygen\Auth\Entity\User;
-use Oxygen\Auth\Repository\AuthenticationLogEntryRepositoryInterface;
+use Lab404\Impersonate\Services\ImpersonateManager;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
-use Oxygen\Preferences\PreferenceNotFoundException;
 use Oxygen\Preferences\PreferencesManager;
 use Illuminate\Routing\Controller;
 use Oxygen\Core\Http\Notification;
@@ -90,7 +82,13 @@ class AuthController extends Controller {
                 'password' => $request->input('password')
             ];
 
-            if ($auth->guard()->attempt($credentials)) {
+            if($auth->guard()->attempt($credentials)) {
+                if($auth->guard()->user()->isDeleted()) {
+                    $auth->guard()->logout();
+                    return response()->json([
+                        'code' => 'account_deactivated'
+                    ], 401);
+                }
                 return $this->makeAuthenticatedLoginResponse($auth->guard());
             } else {
                 $this->incrementLoginAttempts($request);
@@ -114,7 +112,8 @@ class AuthController extends Controller {
      */
     public function makeAuthenticatedLoginResponse(Guard $guard) {
         return response()->json([
-            'user' => $guard->user()->toArray()
+            'user' => $guard->user()->toArray(),
+            'impersonating' => app(ImpersonateManager::class)->isImpersonating()
         ]);
     }
 
@@ -147,12 +146,12 @@ class AuthController extends Controller {
 
         if(!$activated) {
             return response()->json([
-                'content' => __('oxygen/mod-auth::messages.twoFactor.failure'),
+                'content' => __('oxygen/auth::messages.twoFactor.failure'),
                 'status' => 'failed'
             ], 400);
         } else {
             return response()->json([
-                'content' => __('oxygen/mod-auth::messages.twoFactor.success'),
+                'content' => __('oxygen/auth::messages.twoFactor.success'),
                 'status' => 'success'
             ]);
         }
@@ -166,7 +165,6 @@ class AuthController extends Controller {
      * @return mixed
      */
     public function postLogout(AuthManager $auth, Request $request) {
-        $user = $auth->guard('web')->user();
         $auth->guard('web')->logout();
 
         $request->session()->invalidate();
@@ -202,7 +200,7 @@ class AuthController extends Controller {
             $this->repository->persist($user);
 
             return response()->json([
-                'content' => __('oxygen/mod-auth::messages.password.changed'),
+                'content' => __('oxygen/auth::messages.password.changed'),
                 'status' => Notification::SUCCESS
             ]);
         } else {
@@ -227,7 +225,7 @@ class AuthController extends Controller {
         $this->repository->persist($user);
 
         return response()->json([
-            'content' => __('oxygen/mod-auth::messages.fullNameChanged'),
+            'content' => __('oxygen/auth::messages.fullNameChanged'),
             'status' => Notification::SUCCESS,
             'item' => $user->toArray()
         ]);
@@ -243,7 +241,7 @@ class AuthController extends Controller {
         $this->repository->delete($user);
 
         return response()->json([
-            'content' => __('oxygen/mod-auth::messages.account.terminated'),
+            'content' => __('oxygen/auth::messages.account.terminated'),
             'status' => Notification::SUCCESS
         ]);
     }

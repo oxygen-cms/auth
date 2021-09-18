@@ -9,6 +9,9 @@ use Illuminate\Auth\Events\Validated;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Routing\Router;
+use Oxygen\Auth\Console\PermissionsCommand;
+use Oxygen\Auth\Console\ListGroupCommand;
+use Oxygen\Auth\Console\ListSessionCommand;
 use Oxygen\Auth\Console\MakeGroupCommand;
 use Oxygen\Auth\Console\MakeUserCommand;
 use Oxygen\Auth\Console\UsersListCommand;
@@ -16,10 +19,10 @@ use Oxygen\Auth\Listeners\LogAuthentications;
 use Oxygen\Auth\Middleware\Authenticate;
 use Oxygen\Auth\Middleware\ConfirmTwoFactorCode;
 use Oxygen\Auth\Middleware\EnsureEmailIsVerified;
-use Oxygen\Auth\Middleware\Permissions;
 use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
 use Oxygen\Auth\Middleware\RequireTwoFactorDisabled;
 use Oxygen\Auth\Middleware\RequireTwoFactorEnabled;
+use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Permissions\PermissionsInterface;
 use Oxygen\Auth\Permissions\TreePermissionsSystem;
 use Oxygen\Auth\Repository\AuthenticationLogEntryRepositoryInterface;
@@ -31,6 +34,8 @@ use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\BaseServiceProvider;
 use Oxygen\Preferences\PreferencesManager;
 use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
+use Oxygen\Preferences\Schema;
+use Oxygen\Preferences\SchemaRegistered;
 
 class AuthServiceProvider extends BaseServiceProvider {
 
@@ -52,7 +57,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 
         $router->aliasMiddleware('verified', EnsureEmailIsVerified::class);
         $router->aliasMiddleware('oxygen.guest', RedirectIfAuthenticated::class);
-        $router->aliasMiddleware('oxygen.permissions', Permissions::class);
+        $router->aliasMiddleware('oxygen.permissions', Middleware\Permissions::class);
         $router->aliasMiddleware('2fa.require', RequireTwoFactorEnabled::class);
         $router->aliasMiddleware('2fa.confirm', ConfirmTwoFactorCode::class);
         $router->aliasMiddleware('2fa.disabled', RequireTwoFactorDisabled::class);
@@ -60,6 +65,9 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->commands(MakeUserCommand::class);
 		$this->commands(MakeGroupCommand::class);
         $this->commands(UsersListCommand::class);
+        $this->commands(ListGroupCommand::class);
+        $this->commands(ListSessionCommand::class);
+        $this->commands(PermissionsCommand::class);
 
         $this->app[PreferencesManager::class]->loadDirectory(__DIR__ . '/../resources/preferences');
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
@@ -67,6 +75,11 @@ class AuthServiceProvider extends BaseServiceProvider {
         $dispatcher->listen(Login::class, LogAuthentications::class);
         $dispatcher->listen(Logout::class, LogAuthentications::class);
         $dispatcher->listen(Failed::class, LogAuthentications::class);
+
+        // each Preferences schema has a corresponding permission which controls access to it
+        $dispatcher->listen(SchemaRegistered::class, function(SchemaRegistered $event) {
+            $this->app[Permissions::class]->registerPermission('preferences.' . str_replace('.', '_', $event->getKey()));
+        });
 
         $dispatcher->listen(Validated::class, function(Validated $event) {
             if(!$event->user->hasTwoFactorEnabled()) {

@@ -4,7 +4,10 @@ namespace Oxygen\Auth\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping AS ORM;
+use Illuminate\Support\Arr;
 use Oxygen\Auth\Permissions\Permissions;
+use Oxygen\Auth\Permissions\PermissionsSource;
+use Oxygen\Auth\Permissions\TreePermissionsSystem;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
@@ -21,7 +24,7 @@ use Oxygen\Data\Behaviour\Searchable;
  * @ORM\HasLifecycleCallbacks
  */
 
-class Group implements Validatable, PrimaryKeyInterface, Searchable {
+class Group implements Validatable, PrimaryKeyInterface, Searchable, PermissionsSource {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
 
@@ -29,6 +32,12 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * @ORM\Column(type="string")
      */
     protected $name;
+
+    /**
+     * TODO: add `unique=true` at a later stage
+     * @ORM\Column(type="string")
+     */
+    protected $nickname;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -97,9 +106,8 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
      * Returns the group's permissions.
      *
      * @return array
-     * @throws \RuntimeException if user permissions couldn't be decoded.
      */
-    public function getPermissions() {
+    public function getPermissions(): array {
         return $this->permissions;
     }
 
@@ -165,4 +173,75 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable {
         return array_merge_recursive_ignore_null(...array_reverse($perms));
     }
 
+    public function getFlatPermissions(): array {
+        $perms = [];
+        foreach($this->getPermissions() as $contentType => $actions) {
+            foreach ($actions as $action => $value) {
+                if($action === TreePermissionsSystem::PARENT_KEY) {
+                    continue;
+                }
+                $perms[] = $contentType . '.' . $action;
+            }
+        }
+        return $perms;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function getNickname() {
+        return $this->nickname;
+    }
+
+    /**
+     * Grants the specified permissions to the group.
+     *
+     * @param string $key
+     */
+    public function grantPermissions(string $key) {
+        $permissions = $this->getPermissions();
+        Arr::set($permissions, $key, true);
+        $this->setPermissions($permissions);
+    }
+
+    /**
+     * Explicitly denies the specified permission for the group.
+     *
+     * @param string $key
+     */
+    public function denyPermissions(string $key) {
+        $permissions = $this->getPermissions();
+        Arr::set($permissions, $key, false);
+        $this->setPermissions($permissions);
+    }
+
+    /**
+     * Unsets denies the specified permission for the group, reverting it to a default value.
+     *
+     * @param string $key
+     */
+    public function unsetPermissions(string $key) {
+        $permissions = $this->getPermissions();
+        Arr::forget($permissions, $key);
+        $this->setPermissions($permissions);
+    }
+
+    /**
+     * @param string $contentType
+     * @param string|null $parentContentType
+     */
+    public function setPermissionInheritance(string $contentType, ?string $parentContentType) {
+        $permissions = $this->getPermissions();
+        $key = $contentType . '.' . TreePermissionsSystem::PARENT_KEY;
+        if($parentContentType !== null) {
+            Arr::set($permissions, $key, $parentContentType);
+        } else {
+            Arr::forget($permissions, $key);
+        }
+        $this->setPermissions($permissions);
+    }
 }

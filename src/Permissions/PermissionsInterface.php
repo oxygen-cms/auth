@@ -11,8 +11,8 @@ interface PermissionsInterface {
      *
      * @param Closure   $permissionsGenerator a generator which returns permissions arrays to check, in reverse-order of inheritance
      * @param string    $key the permissions key in dot notation
-     * @return bool     if the permission is true or false
+     * @return PermissionsExplanation     if the permission is true or false, plus some expanatory data
      */
-    public function hasPermissions(Closure $permissionsGenerator, string $key): bool;
+    public function explainPermissions(Closure $permissionsGenerator, string $key): PermissionsExplanation;
 
 }

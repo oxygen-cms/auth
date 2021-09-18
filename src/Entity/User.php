@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
 use LaravelDoctrine\ORM\Notifications\Notifiable;
 use Oxygen\Auth\Permissions\Permissions;
+use Oxygen\Auth\Permissions\PermissionsSource;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
@@ -223,7 +224,10 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
             'permissions' => $this->group->getMergedPermissions(),
             'group' => $this->group->toArray(),
             'createdAt' => $this->createdAt !== null ? $this->createdAt->format(DateTimeInterface::ATOM) : null,
-            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(DateTimeInterface::ATOM) : null
+            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(DateTimeInterface::ATOM) : null,
+            'deletedAt' => $this->deletedAt !== null ? $this->deletedAt->format(DateTimeInterface::ATOM) : null,
+            'emailVerified' => $this->hasVerifiedEmail(),
+            'twoFactorAuthEnabled' => $this->hasTwoFactorEnabled()
         ];
     }
 
