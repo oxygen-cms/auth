@@ -38,7 +38,6 @@ class MakeUserCommand extends Command {
 	 */
 	public function handle(UserRepositoryInterface $users, GroupRepositoryInterface $groups) {
 		$username = $this->ask('Username');
-
 		$fullName = $this->anticipate('Full Name', [$username]);
 		$email = $this->ask('Email Address');
 		$password = $this->secret('Password');
@@ -58,21 +57,19 @@ class MakeUserCommand extends Command {
 		$groupNames = [];
 		$mappedGroups = [];
 		foreach($allGroups as $group) {
-			$groupNames[] = $group->getName();
-			$mappedGroups[$group->getName()] = $group;
+            $display = $group->getName() . ' - ' . $group->getDescription();
+			$groupNames[] = $display;
+			$mappedGroups[$display] = $group;
 		}
 
 		$group = $mappedGroups[$this->choice('Group', $groupNames)];
 
-		$preferences = file_get_contents(__DIR__ . '/../../resources/seed/preferences.json');
-
 		try {
 			$item = $users->make();
-			$item->setAllFillable(true);
 			$item->setUsername($username);
 			$item->setFullName($fullName);
 			$item->setEmail($email);
-			$item->setPreferences($preferences);
+			$item->setPreferences([]);
 			$item->setPassword($password);
 			$item->setGroup($group);
 			$users->persist($item);

@@ -3,7 +3,9 @@
 namespace Oxygen\Auth\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping AS ORM;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Permissions\PermissionsSource;
@@ -15,6 +17,7 @@ use Oxygen\Data\Behaviour\PrimaryKey;
 use Oxygen\Data\Behaviour\PrimaryKeyInterface;
 use Oxygen\Data\Behaviour\Timestamps;
 use Oxygen\Data\Behaviour\SoftDeletes;
+use Oxygen\Data\Validation\Rules\Unique;
 use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Searchable;
 
@@ -24,7 +27,7 @@ use Oxygen\Data\Behaviour\Searchable;
  * @ORM\HasLifecycleCallbacks
  */
 
-class Group implements Validatable, PrimaryKeyInterface, Searchable, PermissionsSource {
+class Group implements Validatable, PrimaryKeyInterface, Searchable, PermissionsSource, Arrayable {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
 
@@ -38,6 +41,11 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
      * @ORM\Column(type="string")
      */
     protected $nickname;
+
+    /**
+     * @ORM\Column(type="string", length=30)
+     */
+    protected $icon;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -79,16 +87,19 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
      * @return array
      */
     public function getValidationRules() {
+        $unique = Unique::amongst(get_class($this))->field('nickname')->ignoreWithId($this->getId());
         return [
             'name' => [
                 'required',
                 'max:255'
             ],
+            'nickname' => [
+                $unique
+            ],
             'preferences' => [
                 'required',
             ],
             'permissions' => [
-                'required',
             ]
         ];
     }
@@ -99,7 +110,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
      * @return array
      */
     public function getFillableFields(): array {
-        return ['name', 'description', 'preferences', 'permissions', 'parent'];
+        return ['name', 'description', 'nickname', 'parent', 'icon'];
     }
 
     /**
@@ -114,12 +125,24 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
     /**
      * Sets the permissions.
      *
-     * @param  array|string $permissions
+     * @param  array $permissions
      * @return $this
      */
-    public function setPermissions($permissions) {
+    public function setPermissions(array $permissions) {
+        $this->cleanPermissions($permissions);
         $this->permissions = $permissions;
         return $this;
+    }
+
+    /**
+     * @param array $permissions
+     */
+    private function cleanPermissions(array &$permissions) {
+        foreach($permissions as $contentType => $actions) {
+            if(count($actions) === 0) {
+                Arr::forget($permissions, $contentType);
+            }
+        }
     }
 
     /**
@@ -140,7 +163,12 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description
+            'nickname' => $this->nickname,
+            'description' => $this->description,
+            'icon' => $this->icon,
+            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(\DateTimeInterface::ATOM) : null,
+            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(\DateTimeInterface::ATOM) : null,
+            'deletedAt' => $this->deletedAt !== null ? $this->deletedAt->format(\DateTimeInterface::ATOM) : null
         ];
     }
 
@@ -154,7 +182,10 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
     /**
      * @param null|Group $parent
      */
-    public function setParent(?Group $parent) {
+    public function setParent($parent) {
+        if(is_integer($parent)) {
+            $parent = app(EntityManagerInterface::class)->getReference(Group::class, $parent);
+        }
         $this->parent = $parent;
     }
 
@@ -184,6 +215,14 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
             }
         }
         return $perms;
+    }
+
+    /**
+     * Returns the content types referenced by this group.
+     * @return array
+     */
+    public function getPermissionContentTypes(): array {
+        return array_keys($this->getPermissions());
     }
 
     /**

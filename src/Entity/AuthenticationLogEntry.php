@@ -38,7 +38,7 @@ class AuthenticationLogEntry {
 
     /**
      * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\User", inversedBy="authenticationLogEntries")
-     *  @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      */
     protected $user;
 

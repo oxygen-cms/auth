@@ -3,6 +3,7 @@
 namespace Oxygen\Auth\Repository;
 
 use Oxygen\Data\Repository\Doctrine\Repository;
+use Oxygen\Auth\Entity\User;
 
 class DoctrineUserRepository extends Repository implements UserRepositoryInterface {
 
@@ -12,6 +13,6 @@ class DoctrineUserRepository extends Repository implements UserRepositoryInterfa
      * @var string
      */
 
-    protected $entityName = 'Oxygen\Auth\Entity\User';
+    protected $entityName = User::class;
 
 }

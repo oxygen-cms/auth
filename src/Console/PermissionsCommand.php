@@ -2,11 +2,11 @@
 
 namespace Oxygen\Auth\Console;
 
-use Illuminate\Support\Arr;
-use Oxygen\Auth\Entity\Group;
-use Oxygen\Auth\Permissions\Permissions;
 use Oxygen\Auth\Permissions\PermissionsSource;
 use Oxygen\Auth\Permissions\TreePermissionsSystem;
+use Oxygen\Auth\Entity\Group;
+use Oxygen\Auth\Permissions\Permissions;
+use Oxygen\Auth\Permissions\PermissionsExplanation;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Core\Console\Command;
 use Oxygen\Data\Exception\InvalidEntityException;
@@ -64,6 +64,8 @@ class PermissionsCommand extends Command {
                 yield $group;
             }
         };
+        $keys = $this->getKeyArguments();
+        if($keys === null) { return 1; }
 
         $group = null;
         if($this->argument('nickname') !== null) {
@@ -80,13 +82,13 @@ class PermissionsCommand extends Command {
             $this->line('<info>Tip:</info> use `artisan permissions [groupNickname]` to administer permissions for a single group');
         }
 
-        $keys = $this->getKeyArguments();
         $previousPermissionValues = [];
 
         if(!empty($keys) !== null) {
             foreach($keys as $key) {
                 $recognised = $this->isPermissionRecognised($key);
-                if(!$recognised['recognised'] && $this->option('unset') === null && !$this->confirm("Key `$key` unrecognised, do you wish to continue?")) {
+                if(!$recognised['recognised'] && $this->option('unset') === null &&
+                    !$this->confirm("Key `$key` unrecognised, do you wish to continue?")) {
                     return;
                 }
                 $previousPermissionValues[$key] = $this->cachePreviousPermissionValues($key);
@@ -102,14 +104,13 @@ class PermissionsCommand extends Command {
         foreach($this->option('deny') as $key) {
             $this->denyPermissions($group, $key);
         }
-
-        foreach($this->option('inherit') as $key) {
-            list($contentType, $parentContentType) = explode(':', $key);
+        foreach($this->option('inherit') as $inheritance) {
+            list($contentType, $parentContentType) = explode(':', $inheritance);
             if ($parentContentType === 'null') {
                 $parentContentType = null;
             }
             $this->setPermissionInheritance($group, $contentType, $parentContentType);
-            $this->info("`${contentType}` will now inherit from `$parentContentType`");
+            $this->info("Updating _parent for `${contentType}`...");
         }
 
         if(empty($keys)) {
@@ -126,13 +127,15 @@ class PermissionsCommand extends Command {
                 }
             };
 
+            $this->info("\n\nContent Types:");
+            $this->renderInheritanceTable($group !== null ? $groupsGenerator : $allGroupsGenerator, $group, $all);
+            $this->info("\n\nPermissions:");
             $this->renderPermissionRows($group !== null ? $groupsGenerator : $allGroupsGenerator, $group, $all);
             return;
         } else {
-            $changed = $this->renderPermissionsBeforeAndAfter($allGroupsGenerator, $previousPermissionValues, $keys);
+            $changed = $this->renderPermissionsTable($keys, $allGroupsGenerator, $previousPermissionValues, 'key');
             if(!$changed) {
-                $this->warn('No changes made...');
-                return;
+                $this->warn('No changes made!');
             }
         }
 
@@ -148,61 +151,69 @@ class PermissionsCommand extends Command {
         $this->saveGroups($group);
     }
 
-    private function getKeyArguments(): array {
+    private function getKeyArguments(): ?array {
         $keys = [];
         if($this->option('grant') !== null) { $keys = array_merge($keys, $this->option('grant')); }
         if($this->option('deny') !== null) { $keys = array_merge($keys, $this->option('deny')); }
         if($this->option('unset') !== null) { $keys = array_merge($keys, $this->option('unset')); }
+        if($this->option('inherit') !== null) {
+            foreach ($this->option('inherit') as $key) {
+                $parts = explode(':', $key);
+                if(count($parts) !== 2) {
+                    $this->line('<fg=red>Expected argument <fg=white;options=bold,underscore>--inherit=[contentType]:[parentContentType]</>, got <fg=white;options=bold,underscore>--inherit=' . $key . '</> instead.</>');
+                    return null;
+                }
+                list($from, $to) = $parts;
+                $keys[] = $from;
+            }
+        }
         return $keys;
     }
 
+    private function renderInheritanceTable(callable $groupsGenerator, ?Group $specificGroup, bool $all) {
+        $contentTypes = [];
+        if($specificGroup !== null) {
+            $contentTypes = array_merge($contentTypes, $specificGroup->getPermissionContentTypes());
+        }
+        if($all) {
+            $contentTypes = array_merge($contentTypes, $this->permissions->getAllContentTypes());
+        }
+        sort($contentTypes);
+        $contentTypes = array_unique($contentTypes);
+
+        $this->renderPermissionsTable($contentTypes, $groupsGenerator, null, 'Content Type');
+    }
+
     private function renderPermissionRows(callable $groupsGenerator, ?Group $specificGroup, bool $all) {
-        if($all && $specificGroup !== null) {
-            $keys = array_unique(array_merge($specificGroup->getFlatPermissions(), $this->permissions->getAllPermissions()));
-        } else if($all) {
-            $keys = $this->permissions->getAllPermissions();
-        } else {
-            $keys = $specificGroup->getFlatPermissions();
+        $keys = [];
+        if($specificGroup !== null) {
+            $keys = array_merge($keys, $specificGroup->getFlatPermissions());
         }
+        if($all) {
+            $keys = array_merge($keys, $this->permissions->getAllPermissions());
+        }
+        sort($keys);
+        $keys = array_unique($keys);
 
-        $permissionsRows = array_map(function(string $key) use($groupsGenerator) {
+        $this->renderPermissionsTable($keys, $groupsGenerator, null, 'Key');
+    }
+
+    private function renderPermissionsTable(array $keys, callable $groupsGenerator, ?array $previousPermissionValues = null, string $firstColumnName) {
+        $permissionsRows = array_map(function(string $key) use($groupsGenerator, $previousPermissionValues) {
             $row = [$key];
             $groups = $groupsGenerator();
             foreach($groups as $source) {
-                $row[] = $this->permissionExplanationToString($source, $key);
-            }
+                $explanation = $this->explain($source, $key);
 
-            $recognised = $this->isPermissionRecognised($key);
-            $row[] = $recognised['reason'];
-            return $row;
-        }, $keys);
-
-        $this->table($this->getPermissionsHeaders($groupsGenerator), $permissionsRows, 'box-double');
-    }
-
-    private function cachePreviousPermissionValues(string $key): array {
-        $cache = [];
-        foreach($this->groups->all() as $group) {
-            $cache[$group->getId()] = $this->permissionExplanationToString($group, $key);
-        }
-        return $cache;
-    }
-
-    private function renderPermissionsBeforeAndAfter(callable $groupsGenerator, array $previousPermissionValues, array $keys) {
-        $changed = false;
-        $permissionsRows = array_map(function($key) use($groupsGenerator, $previousPermissionValues, &$changed) {
-            // $display = $data['mode'] === 'current' ? "$key <fg=cyan>(current)</>" : "$key <fg=yellow>(previous)</>";
-            $row = [$key];
-
-            $groups = $groupsGenerator();
-            foreach($groups as $source) {
-                $before = $previousPermissionValues[$key][$source->getId()];
-                $after = $this->permissionExplanationToString($source, $key);
-                if($before === $after) {
-                    $row[] = '(unchanged)';
+                if($previousPermissionValues !== null ){
+                    $before = $previousPermissionValues[$key][$source->getId()];
+                    if($before->equals($explanation)) {
+                        $row[] = $explanation->toConsoleString();
+                    } else {
+                        $row[] = $before->toConsoleString() . '  🠲   ' . $explanation->toConsoleString();
+                    }
                 } else {
-                    $changed = true;
-                    $row[] = $before . '  🠲   ' . $after;
+                    $row[] = $explanation->toConsoleString();
                 }
             }
 
@@ -211,35 +222,34 @@ class PermissionsCommand extends Command {
             return $row;
         }, $keys);
 
-        $this->table($this->getPermissionsHeaders($groupsGenerator), $permissionsRows, 'box');
-
-        return $changed;
+        $this->table($this->getPermissionsHeaders($groupsGenerator, $firstColumnName), $permissionsRows, 'box-double');
     }
 
-    private function permissionExplanationToString(Group $group, string $key): string {
-        list($contentType, $action) = explode('.', $key);
-
-        $explanation = $this->permissions->explainForGroup($group, $key);
-        if($explanation->getSource() === $group && $explanation->getKey() === $key) {
-            $value = $explanation->isPermitted() ? '<fg=black;bg=green;options=bold>Yes</>' : '<error>No</error>';
-        } else if($explanation->getSource() === $group) {
-            $value = $explanation->isPermitted() ? 'Yes' : 'No';
-            $value .= ', from <fg=cyan;options=bold>' . $explanation->getKey() . '</>';
-        } else if($explanation->getSource() !== null && $explanation->getKey() === $key) {
-            $value = $explanation->isPermitted() ? 'Yes' : 'No';
-            $value .= ', from <fg=magenta;options=bold>' . $explanation->getSource()->getNickname() . '(...)</>';
-        } else if($explanation->getSource() !== null) {
-            $value = $explanation->isPermitted() ? 'Yes' : 'No';
-            $value .= ', from <fg=magenta;options=bold>' . $explanation->getSource()->getNickname() . '(' . $explanation->getKey() . ')</>';
-        } else {
-            $value = '<fg=default>No</>';
+    private function cachePreviousPermissionValues(string $key): array {
+        $cache = [];
+        foreach($this->groups->all() as $group) {
+            $explanation = $this->explain($group, $key);
+            $cache[$group->getId()] = $explanation;
         }
-        return $value;
+        return $cache;
+    }
+
+    private function explain(Group $source, string $key) {
+        if(count(explode('.', $key)) === 1) {
+            return $this->permissions->explainParentForGroup($source, $key);
+        } else {
+            return $this->permissions->explainForGroup($source, $key);
+        }
     }
 
     private function isPermissionRecognised(string $key): array {
+        $parts = explode('.', $key);
+        if(count($parts) === 1) {
+            return [ 'recognised' => true, 'reason' => ''];
+        }
+
+        list($contentType, $action) = $parts;
         $allActions = $this->permissions->getAllActions();
-        list($contentType, $action) = explode('.', $key);
 
         if(str_starts_with($contentType, '_')) {
             if(!isset($allActions[$action])) {
@@ -256,8 +266,8 @@ class PermissionsCommand extends Command {
      * @param callable $groupsGenerator
      * @return string[]
      */
-    private function getPermissionsHeaders(callable $groupsGenerator): array {
-        $headers = ['Key'];
+    private function getPermissionsHeaders(callable $groupsGenerator, string $firstColumn): array {
+        $headers = [$firstColumn];
         $groups = $groupsGenerator();
         foreach ($groups as $source) {
             $headers[] = $source->getNickname() . ' (' . $source->getName() . ')';
@@ -304,8 +314,7 @@ class PermissionsCommand extends Command {
      * @param Group|null $group
      * @throws InvalidEntityException
      */
-    private function saveGroups(?Group $group): void
-    {
+    private function saveGroups(?Group $group): void {
         if ($group !== null) {
             $this->groups->persist($group);
             $this->info('Group saved.');

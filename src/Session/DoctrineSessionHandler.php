@@ -3,6 +3,7 @@
 namespace Oxygen\Auth\Session;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Auth\Guard;
@@ -39,8 +40,10 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * @var bool
      */
     protected $exists;
-
-    private EntityManager $em;
+    /**
+     * @var EntityManagerInterface|null
+     */
+    private $em;
 
     /**
      * Create a new database session handler instance.
@@ -49,9 +52,9 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * @param int $minutes
      * @param Container|null $container
      */
-    public function __construct(EntityManager $em, int $minutes, Container $container = null) {
-        $this->em = $em;
+    public function __construct(int $minutes, Container $container = null) {
         $this->minutes = $minutes;
+        $this->em = null;
         $this->container = $container;
     }
 
@@ -73,7 +76,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * {@inheritdoc}
      */
     public function read($sessionId) {
-        $session = $this->em->find(DoctrineSession::class, $sessionId);
+        $session = $this->getEntityManager()->find(DoctrineSession::class, $sessionId);
 
         if($session === null) {
             $this->exists = false;
@@ -116,14 +119,14 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * @throws \Doctrine\ORM\TransactionRequiredException
      */
     protected function performUpdate($sessionId, string $data, $updateAuxiliaryInfo) {
-        $session = $this->em->find(DoctrineSession::class, $sessionId);
+        $session = $this->getEntityManager()->find(DoctrineSession::class, $sessionId);
         if($session === null) {
             $session = new DoctrineSession($sessionId, $data);
         }
 
         $updateAuxiliaryInfo($session);
-        $this->em->persist($session);
-        $this->em->flush();
+        $this->getEntityManager()->persist($session);
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -135,7 +138,16 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      */
     protected function addUserInformation(DoctrineSession $session) {
         if($this->container && $this->container->bound(Guard::class)) {
-            $session->setUser($this->container->make(Guard::class)->user());
+            $user = $this->container->make(Guard::class)->user();
+            if($user !== null && !$this->getEntityManager()->contains($user)) {
+                // if we are trying to update the user model and it fails, then the EntityManager will get closed
+                // then the `user` instance is managed by the old entity manager, which will cause issues when
+                // we then try to persist the DoctrineSession entity.
+                //
+                // in order to fix this, we need to retrieve a fresh User entity from scratch
+                $user = $this->getEntityManager()->find(User::class, $user->getId());
+            }
+            $session->setUser($user);
         }
 
         return $this;
@@ -217,7 +229,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * @return QueryBuilder
      */
     protected function getQuery() {
-        return $this->em->createQueryBuilder();
+        return $this->getEntityManager()->createQueryBuilder();
     }
 
     /**
@@ -245,5 +257,24 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
             ->setParameter('user', $user)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Returns an entity manager, possibly resetting it if it was previously closed.
+     *
+     * @return EntityManagerInterface
+     * @throws BindingResolutionException
+     */
+    private function getEntityManager(): EntityManagerInterface {
+        if($this->em !== null && $this->em->isOpen()) {
+            return $this->em;
+        }
+        $registry = $this->container->make('registry');
+        $this->em = $registry->getManager();
+        if(!$this->em->isOpen()) {
+            // try to reset the connection... we want to save session data at all costs
+            $this->em = $registry->resetManager();
+        }
+        return $this->em;
     }
 }

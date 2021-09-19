@@ -46,7 +46,7 @@ class DoctrineAuthenticationLogEntryRepository extends Repository implements Aut
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function isKnownDevice(User $user, string $ipAddress, string $userAgent) {
-        return $this->createCountQuery()
+        return intval($this->createCountQuery()
             ->where('o.user = :user')
             ->andWhere('o.ipAddress = :ipAddress')
             ->andWhere('o.userAgent = :userAgent')
@@ -54,7 +54,7 @@ class DoctrineAuthenticationLogEntryRepository extends Repository implements Aut
             ->setParameter('user', $user)
             ->setParameter('ipAddress', $ipAddress)
             ->setParameter('ty', AuthenticationLogEntry::LOGIN_SUCCESS)
-            ->setParameter('userAgent', $userAgent)->getQuery()->getSingleScalarResult() > 0;
+            ->setParameter('userAgent', $userAgent)->getQuery()->getSingleScalarResult()) > 0;
     }
 
     /**
@@ -66,12 +66,13 @@ class DoctrineAuthenticationLogEntryRepository extends Repository implements Aut
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function isFirstLogin(User $user) {
-        return $this->createCountQuery()
+        $numLogins = intval($this->createCountQuery()
                 ->where('o.user = :user')
                 ->andWhere('o.type = :ty')
                 ->setParameter('user', $user)
                 ->setParameter('ty', AuthenticationLogEntry::LOGIN_SUCCESS)
-                ->getQuery()->getSingleScalarResult() === 0;
+                ->getQuery()->getSingleScalarResult());
+        return $numLogins === 0;
     }
 
     /**

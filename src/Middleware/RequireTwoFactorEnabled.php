@@ -51,10 +51,11 @@ class RequireTwoFactorEnabled {
      */
     public function handle($request, Closure $next, $redirectToRoute = '2fa.notice') {
         if(!$this->user->hasTwoFactorEnabled()) {
-            return $this->response->notification(
-                new Notification(trans('laraguard::messages.enable'), Notification::INFO),
-                ['redirect' => $redirectToRoute]
-            );
+            return $this->response->json([
+                'content' => trans('laraguard::messages.enable'),
+                'code' => 'two_factor_setup_required',
+                'status' => Notification::INFO
+            ], 403);
         }
 
         return $next($request);

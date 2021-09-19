@@ -24,9 +24,10 @@ class ListGroupCommand extends Command {
     protected $description = 'List all groups';
 
     const GROUP_HEADERS = [
-        'Id',
-        'Name',
+        'Nickname',
+        'Display Name',
         'Description',
+        'Icon',
         '# Users',
         'Parent Group',
         'Child Groups',
@@ -60,12 +61,13 @@ class ListGroupCommand extends Command {
             $parent = $group->getParent();
 
             return [
-                'id' => $group->getId(),
+                'nickname' => $group->getNickname(),
                 'name' => $group->getName(),
                 'description' => $group->getDescription(),
+                'icon' => $group->getIcon(),
                 'users' => '<fg=blue>' . $group->getUsers()->count() . '</> members',
-                'parent' => $parent ? $parent->getName() : '-',
-                'children' => implode(', ' ,$group->getChildren()->map(function(Group $child) { return $child->getName(); })->toArray()),
+                'parent' => $parent ? $parent->getNickname() : '-',
+                'children' => implode(', ' ,$group->getChildren()->map(function(Group $child) { return $child->getNickname(); })->toArray()),
                 'createdAt' => $group->getCreatedAt() !== null ? $group->getCreatedAt()->format(self::DATE_FORMAT) : null,
                 'updatedAt' => $group->getUpdatedAt() !== null ? $group->getUpdatedAt()->format(self::DATE_FORMAT) : null
             ];

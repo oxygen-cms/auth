@@ -43,7 +43,9 @@ class TreePermissionsSystem implements PermissionsInterface {
         }
 
         // check recursively
-        return $this->checkPermissionsRecursive($permissionsGenerator, $keyParts[0], $keyParts[1]);
+        $explanation = $this->checkPermissionsRecursive($permissionsGenerator, $keyParts[0], $keyParts[1]);
+        $explanation->setRequestedInfo($this->getOriginalSource($permissionsGenerator), $keyParts[0], $keyParts[1]);
+        return $explanation;
     }
 
     /**
@@ -57,27 +59,31 @@ class TreePermissionsSystem implements PermissionsInterface {
         foreach($generator as $permissionsSource) {
             $permissions = $permissionsSource->getPermissions();
             if(isset($permissions[$contentType][$action])) {
-                return PermissionsExplanation::make($permissions[$contentType][$action], $permissionsSource, $contentType, $action);
+                $explanation = new PermissionsExplanation($permissions[$contentType][$action]);
+                $explanation->setSource($permissionsSource, $contentType, $action);
+                return $explanation;
             }
         }
         return null;
     }
 
+    private function getOriginalSource(Closure $permissionsGenerator): PermissionsSource {
+        $generator = $permissionsGenerator();
+        foreach($generator as $item) { return $item; }
+    }
+
     /**
      * @param Closure $permissionsGenerator
      * @param string $contentType
-     * @param string $action
-     * @return mixed
+     * @return PermissionsExplanation
      */
-    protected function getPermissionsMixedValue(Closure $permissionsGenerator, string $contentType, string $action) {
-        $generator = $permissionsGenerator();
-        foreach($generator as $permissionsSource) {
-            $permissions = $permissionsSource->getPermissions();
-            if(isset($permissions[$contentType][$action])) {
-                return $permissions[$contentType][$action];
-            }
+    public function explainParentContentType(Closure $permissionsGenerator, string $contentType): PermissionsExplanation {
+        $explanation = $this->getPermissionsValue($permissionsGenerator, $contentType, self::PARENT_KEY);
+        if($explanation === null) {
+            $explanation = new PermissionsExplanation(self::ROOT_CONTENT_TYPE);
         }
-        return null;
+        $explanation->setRequestedInfo($this->getOriginalSource($permissionsGenerator), $contentType, self::PARENT_KEY);
+        return $explanation;
     }
 
     /**
@@ -104,16 +110,13 @@ class TreePermissionsSystem implements PermissionsInterface {
         $exactMatch = $this->getPermissionsValue($permissionsGenerator, $contentType, $action);
         if($exactMatch !== null) {
             return $exactMatch;
+        } else if($contentType === self::ROOT_CONTENT_TYPE) {
+            return new PermissionsExplanation(false);
         } else {
-            $parent = $this->getPermissionsMixedValue($permissionsGenerator, $contentType, self::PARENT_KEY);
-            if($parent === null) {
-                $parent = self::ROOT_CONTENT_TYPE;
-            }
-            if($contentType === self::ROOT_CONTENT_TYPE) {
-                return PermissionsExplanation::deniedByDefault();
-            }
+            $parent = $this->explainParentContentType($permissionsGenerator, $contentType);
+
             // look in the parent contentType
-            return $this->checkPermissionsRecursive($permissionsGenerator, $parent, $action, $depth + 1);
+            return $this->checkPermissionsRecursive($permissionsGenerator, $parent->getValue(), $action, $depth + 1);
         }
     }
 

@@ -6,11 +6,15 @@ use Oxygen\Auth\Controller\AuthenticationLogController;
 use Oxygen\Auth\Controller\EmailVerificationController;
 use Oxygen\Auth\Controller\PasswordController;
 use Oxygen\Auth\Controller\UsersController;
+use Oxygen\Auth\Controller\GroupsController;
 
 Route::prefix('/oxygen/api')->middleware(['api'])->group(function(Router $router) {
 
     $router->post('auth/login',  [AuthController::class, 'postLogin'])
         ->name('auth.postLogin');
+
+    $router->get('auth/preferences',  [AuthController::class, 'getLoginPreferences'])
+        ->name('auth.getLoginPreferences');
 
     $router->post('auth/send-reminder-email', [PasswordController::class, 'postRemind'])
         ->name('password.postRemind')
@@ -57,10 +61,6 @@ Route::prefix('/oxygen/api/auth')->middleware('api_auth')->group(function(Router
         ->name('auth.getIPGeolocation')
         ->middleware('oxygen.permissions:auth.getAuthenticationLogEntries');
 
-    $router->put('fullName', [AuthController::class, 'putUpdateFullName'])
-        ->name('auth.putUpdateFullName')
-        ->middleware('oxygen.permissions:auth.putUpdate');
-
     $router->post('change-password', [AuthController::class, 'postChangePassword'])
         ->name('auth.postChangePassword')
         ->middleware(['oxygen.permissions:auth.postChangePassword']);
@@ -74,12 +74,25 @@ Route::prefix('/oxygen/api/users')->middleware('api_auth')->group(function(Route
     UsersController::registerCrudRoutes($router);
     UsersController::registerSoftDeleteRoutes($router);
 
+    $router->put('{user}/fullName', [UsersController::class, 'putUpdateFullName'])
+        ->name('users.putUpdateFullName')
+        ->middleware('oxygen.ownerPermissions:users.putUpdate,users.owner_putUpdateFullName');
+
+    $router->delete('/{id}/force', [UsersController::class, 'deleteForce'])
+        ->name("users.deleteForce")
+        ->middleware("oxygen.ownerPermissions:users.deleteForce,users.owner_deleteForce");
+
     $router->post('{id}/impersonate', [UsersController::class, 'postImpersonate'])
         ->name('users.postImpersonate')
         ->middleware('oxygen.permissions:users.postImpersonate');
 
     $router->post('stop-impersonating', [UsersController::class, 'postLeaveImpersonate'])
         ->name('users.postLeaveImpersonate');
+});
+
+Route::prefix('/oxygen/api/groups')->middleware('api_auth')->group(function(Router $router) {
+    GroupsController::registerCrudRoutes($router);
+    GroupsController::registerSoftDeleteRoutes($router);
 });
 
 

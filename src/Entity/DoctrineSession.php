@@ -19,7 +19,8 @@ class DoctrineSession {
     private ?string $id;
 
     /**
-     * @ORM\ManyToOne()
+     * @ORM\ManyToOne
+     * @ORM\JoinColumn(name="user_id", onDelete="CASCADE")
      */
     protected ?User $user;
 

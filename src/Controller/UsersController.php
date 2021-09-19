@@ -3,16 +3,23 @@
 namespace Oxygen\Auth\Controller;
 
 use Illuminate\Auth\AuthManager;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Passwords\TokenRepositoryInterface;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Oxygen\Auth\Entity\User;
+use Oxygen\Auth\Notifications\UserInvitedNotification;
 use Oxygen\Core\Controller\Controller;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Crud\Controller\BasicCrudApi;
 use Oxygen\Crud\Controller\SoftDeleteCrudApi;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
+use Oxygen\Data\Exception\InvalidEntityException;
 
 class UsersController extends Controller {
 
@@ -23,6 +30,7 @@ class UsersController extends Controller {
     }
 
     const PER_PAGE = 50;
+    const INITIAL_RANDOM_PASSWORD_LENGTH = 50;
 
     const LANG_MAPPINGS = [
         'resource' => 'User',
@@ -39,70 +47,77 @@ class UsersController extends Controller {
         BasicCrudApi::setupLangMappings(self::LANG_MAPPINGS);
     }
 
-//    /**
-//     * Checks to see if the passed parameter was an instance
-//     * of Model, if not it will run a query for the model.
-//     *
-//     * @param mixed $item
-//     * @return object
-//     */
-//    protected function getItem($item) {
-//        if(is_object($item)) {
-//            $item->setAllFillable(true);
-//            return $item;
-//        } else {
-//            $item = $this->repository->find($item);
-//            $item->setAllFillable(true);
-//            return $item;
-//        }
-//    }
+    /**
+     * Creates a new Resource - returns JSON response.
+     *
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function postCreateApi(Request $request, \Illuminate\Auth\Passwords\PasswordBroker $passwordBroker) {
+        $item = $this->repository->make();
+        $item->fromArray($request->except(['_token']));
+        $item->setPassword(Str::random(self::INITIAL_RANDOM_PASSWORD_LENGTH));
+        $item->setPreferences([]);
+        $resetToken = $passwordBroker->createToken($item);
+        $this->repository->persist($item);
+        \Illuminate\Support\Facades\Notification::send([$item], new UserInvitedNotification($resetToken));
 
-//    /**
-//     * Shows the create form.
-//     *
-//     * @return \Illuminate\View\View
-//     */
-//    public function getCreate() {
-//        $extraFields = [];
-//
-//        $password = new FieldMetadata('password', 'password', true);
-//        $field = new EditableField($password);
-//
-//        $extraFields[] = new Row([new Label($password), $field]);
-//
-//        return view('oxygen/crud::basic.create', [
-//            'item' => $this->repository->make(),
-//            'title' => __('oxygen/crud::ui.resource.create'),
-//            'fields' => $this->crudFields,
-//            'extraFields' => $extraFields
-//        ]);
-//    }
+        return response()->json([
+            'status' => Notification::SUCCESS,
+            'content' => trans('oxygen/auth::messages.accountCreated', ['email' => $item->getEmail()]),
+            'item' => $item->toArray()
+        ]);
+    }
 
-//    /**
-//     * Creates a new Resource.
-//     *
-//     * @param Request $input
-//     * @return \Illuminate\Http\Response
-//     * @throws \Exception
-//     */
-//    public function postCreate(Request $input) {
-//        try {
-//            $item = $this->getItem($this->repository->make());
-//            $item->fromArray($this->transformInput($input->except(['_method', '_token', 'password'])));
-//            $item->setPassword($input->get('password'));
-//            $this->repository->persist($item);
-//
-//            return notify(
-//                new Notification(__('oxygen/crud::messages.basic.created')),
-//                ['redirect' => $this->blueprint->getRouteName('getList')]
-//            );
-//        } catch(InvalidEntityException $e) {
-//            return notify(
-//                new Notification($e->getErrors()->first(), Notification::FAILED),
-//                ['input' => true]
-//            );
-//        }
-//    }
+    /**
+     * Change the user's password.
+     *
+     * @param AuthManager $auth
+     * @param Request $request
+     * @return JsonResponse
+     * @throws InvalidEntityException
+     */
+    public function putUpdateFullName(User $user, AuthManager $auth, Request $request) {
+        $user->setFullName($request->get('fullName'));
+        $this->repository->persist($user);
+
+        return response()->json([
+            'content' => __('oxygen/auth::messages.fullNameChanged'),
+            'status' => Notification::SUCCESS,
+            'item' => $user->toArray()
+        ]);
+    }
+
+    /**
+     * Deletes an entity.
+     *
+     * @param User $user the item
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteDeleteApi($item) {
+        $user = $this->repository->find($item);
+        $user->delete();
+        $this->repository->persist($user);
+
+        return response()->json([
+            'content' => __('oxygen/crud::messages.basic.deleted'),
+            'status' => Notification::SUCCESS
+        ]);
+    }
+
+    /**
+     * Deletes a user permanently.
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function deleteForce($item) {
+        $user = $this->repository->find($item);
+        $this->repository->delete($user);
+        return response()->json([
+            'content' => __('oxygen/auth::messages.account.terminated'),
+            'status' => Notification::SUCCESS
+        ]);
+    }
 
     /**
      * Logs in as the specified user.

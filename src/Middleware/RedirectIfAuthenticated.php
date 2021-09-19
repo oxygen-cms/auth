@@ -50,10 +50,17 @@ class RedirectIfAuthenticated {
      */
     public function handle($request, Closure $next) {
         if($this->auth->guard()->check()) {
-            return $this->response->notification(
-                new Notification($this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn')),
-                ['redirect' => $this->preferences->get('modules.auth::dashboard')]
-            );
+            if($request->wantsJson()) {
+                return $this->response->json([
+                    'content' => $this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn'),
+                    'status' => Notification::WARNING
+                ], 406);
+            } else {
+                return $this->response->notification(
+                    new Notification($this->lang->get('oxygen/auth::messages.filter.alreadyLoggedIn'), Notification::WARNING),
+                    ['redirect' => $this->preferences->get('modules.auth::dashboard')]
+                );
+            }
         }
 
         return $next($request);

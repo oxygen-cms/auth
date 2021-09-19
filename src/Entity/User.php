@@ -5,8 +5,8 @@ namespace Oxygen\Auth\Entity;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
 use DateTimeInterface;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping AS ORM;
-use Exception;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as LaravelAuthenticable;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -14,8 +14,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
 use LaravelDoctrine\ORM\Notifications\Notifiable;
+use Oxygen\Auth\Permissions\OwnedByUser;
 use Oxygen\Auth\Permissions\Permissions;
-use Oxygen\Auth\Permissions\PermissionsSource;
 use Oxygen\Auth\Preferences\Preferences;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\Fillable;
@@ -36,7 +36,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
  * @ORM\Table(name="users")
  * @ORM\HasLifecycleCallbacks
  */
-class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail {
+class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail, \LaravelDoctrine\ORM\Contracts\UrlRoutable, OwnedByUser {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Preferences;
     use Notifiable;
@@ -61,7 +61,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     protected Group $group;
 
     /**
-     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\AuthenticationLogEntry", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\AuthenticationLogEntry", mappedBy="user", cascade={"persist", "remove"})
      */
     protected $authenticationLogEntries;
 
@@ -70,22 +70,6 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      * @var DateTimeInterface
      */
     protected $verifiedAt;
-
-    /**
-     * True if all fields should be fillable (only for Administrators)
-     *
-     * @var boolean
-     */
-    protected $allFillable;
-
-    /**
-     * Sets whether all fields should be fillable.
-     *
-     * @param boolean $fillable
-     */
-    public function setAllFillable($fillable) {
-        $this->allFillable = $fillable;
-    }
 
     /**
      * Returns an array of validation rules used to validate the model.
@@ -126,11 +110,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      * @return array
      */
     public function getFillableFields(): array {
-        if($this->allFillable) {
-            return ['username', 'fullName', 'email', 'preferences', 'group'];
-        } else {
-            return ['fullName'];
-        }
+        return ['username', 'fullName', 'email', 'group'];
     }
 
     /**
@@ -279,6 +259,26 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      */
     public function getKey() {
         return $this->getId();
+    }
+
+    /**
+     * @return $this
+     */
+    public function getOwner(): User {
+        return $this;
+    }
+
+    /**
+     * @param int|Group $group
+     */
+    public function setGroup($group): void {
+        if(is_integer($group)) {
+            $group = app(EntityManager::class)->getReference(Group::class, $group);
+        }
+        if(is_null($group)) {
+            throw new InvalidEntityException($this, new MessageBag(['group' => 'Group is required.']));
+        }
+        $this->group = $group;
     }
 
 }

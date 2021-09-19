@@ -7,7 +7,7 @@ trait Preferences {
     /**
      * @ORM\Column(type="json")
      */
-    protected $preferences;
+    protected $preferences = [];
 
     /**
      * Returns the preferences repository.

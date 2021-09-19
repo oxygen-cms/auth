@@ -12,45 +12,58 @@
 
 return [
 
-    /*
-    | ---------------
-    | Auth
-    | ---------------
-    |
-    | Authentication related messages.
-    */
-
    'filter' => [
-        'notLoggedIn'          => 'You need to be logged in to view that page.',
         'alreadyLoggedIn'      => 'You\'re already logged in'
     ],
-
-
-    /*
-    | ---------------
-    | Permissions
-    | ---------------
-    |
-    | Messages related to the permissions system.
-    */
 
     'permissions' => [
         'noPermissions' => 'Insufficient Permissions',
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Log Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication log for
-    | various messages that we need to display to the user. You are free to
-    | modify these language lines according to your application's requirements.
-    |
-    */
 
     'newDeviceNotification' => [
         'subject' => 'Login from a new IP address/browser',
+    ],
+
+    /*
+    | ---------------
+    | Password
+    | ---------------
+    |
+    | Messages related to changing the user's password.
+    */
+
+    'password' => [
+        'invalid'       => 'The old password field is invalid',
+        'changed'       => 'Password Changed',
+        'changeFailed'  => 'Password Change Failed'
+    ],
+
+    /*
+    | ---------------
+    | Account
+    | ---------------
+    |
+    | Messages relating to the destruction of the user's account.
+    */
+
+    'account' => [
+        'terminated'      => 'The account has been terminated',
+        'terminateFailed' => 'Account Termination Failed'
+    ],
+
+    /*
+    | ---------------
+    | Password Reminders
+    | ---------------
+    |
+    | Messages relating to password reminders.
+    */
+
+    'reminder' => [
+        'email'      => [
+            'subject'    => 'Password Reminder'
+        ]
     ],
 
     'impersonated' => 'Now impersonating :name',
@@ -63,6 +76,8 @@ return [
         'failure' => 'Sorry, but that\'s not a valid code. Try again'
     ],
 
-    'fullNameChanged' => 'Full name updated',
+    'fullNameChanged' => 'Full Name updated',
+
+    'accountCreated' => 'An account has been created and an invite link has been sent to :email with further instructions'
 
 ];

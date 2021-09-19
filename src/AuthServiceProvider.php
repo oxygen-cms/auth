@@ -16,7 +16,6 @@ use Oxygen\Auth\Console\MakeGroupCommand;
 use Oxygen\Auth\Console\MakeUserCommand;
 use Oxygen\Auth\Console\UsersListCommand;
 use Oxygen\Auth\Listeners\LogAuthentications;
-use Oxygen\Auth\Middleware\Authenticate;
 use Oxygen\Auth\Middleware\ConfirmTwoFactorCode;
 use Oxygen\Auth\Middleware\EnsureEmailIsVerified;
 use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
@@ -36,6 +35,7 @@ use Oxygen\Preferences\PreferencesManager;
 use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
 use Oxygen\Preferences\Schema;
 use Oxygen\Preferences\SchemaRegistered;
+use Oxygen\Auth\Listeners\EnforceTwoFactorAuth;
 
 class AuthServiceProvider extends BaseServiceProvider {
 
@@ -58,6 +58,7 @@ class AuthServiceProvider extends BaseServiceProvider {
         $router->aliasMiddleware('verified', EnsureEmailIsVerified::class);
         $router->aliasMiddleware('oxygen.guest', RedirectIfAuthenticated::class);
         $router->aliasMiddleware('oxygen.permissions', Middleware\Permissions::class);
+        $router->aliasMiddleware('oxygen.ownerPermissions', Middleware\OwnerPermissions::class);
         $router->aliasMiddleware('2fa.require', RequireTwoFactorEnabled::class);
         $router->aliasMiddleware('2fa.confirm', ConfirmTwoFactorCode::class);
         $router->aliasMiddleware('2fa.disabled', RequireTwoFactorDisabled::class);
@@ -69,6 +70,11 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->commands(ListSessionCommand::class);
         $this->commands(PermissionsCommand::class);
 
+        // each Preferences schema has a corresponding permission which controls access to it
+        $dispatcher->listen(SchemaRegistered::class, function(SchemaRegistered $event) {
+            $this->app[Permissions::class]->registerPermission('preferences.' . str_replace('.', '_', $event->getKey()));
+        });
+
         $this->app[PreferencesManager::class]->loadDirectory(__DIR__ . '/../resources/preferences');
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 
@@ -76,32 +82,7 @@ class AuthServiceProvider extends BaseServiceProvider {
         $dispatcher->listen(Logout::class, LogAuthentications::class);
         $dispatcher->listen(Failed::class, LogAuthentications::class);
 
-        // each Preferences schema has a corresponding permission which controls access to it
-        $dispatcher->listen(SchemaRegistered::class, function(SchemaRegistered $event) {
-            $this->app[Permissions::class]->registerPermission('preferences.' . str_replace('.', '_', $event->getKey()));
-        });
-
-        $dispatcher->listen(Validated::class, function(Validated $event) {
-            if(!$event->user->hasTwoFactorEnabled()) {
-                return;
-            }
-
-            $request = app('request');
-            $code = $request->input(config('laraguard.input'));
-            $validator = validator([
-                'code' => $code
-            ], [
-                'code' => ['required', new TotpCodeRule($event->user)]
-            ]);
-
-            if($validator->fails()) {
-                throw new HttpResponseException(response()->json([
-                    'code' => 'two_factor_auth_failed'
-                ], 401));
-            }
-
-            $request->session()->put('2fa.totp_confirmed_at', now()->timestamp);
-        });
+        $dispatcher->listen(Validated::class, EnforceTwoFactorAuth::class);
 	}
 
 	/**

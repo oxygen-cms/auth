@@ -43,7 +43,7 @@ class Permissions {
      * @return bool
      */
     public function hasForGroup(Group $group, string $key): bool {
-        return $this->explainForGroup($group, $key)->isPermitted();
+        return (bool) $this->explainForGroup($group, $key)->getValue();
     }
 
     /**
@@ -53,14 +53,28 @@ class Permissions {
      * @return PermissionsExplanation
      */
     public function explainForGroup(Group $group, string $key): PermissionsExplanation {
-        $generator = function() use($group) {
+        $generator = $this->getGroupsGenerator($group);
+        return $this->implementation->explainPermissions($generator, $key);
+    }
+
+    /**
+     * Determines a parent content type for a given content type.
+     * @param Group $group
+     * @param string $contentType
+     * @return PermissionsExplanation
+     */
+    public function explainParentForGroup(Group $group, string $contentType): PermissionsExplanation {
+        $generator = $this->getGroupsGenerator($group);
+        return $this->implementation->explainParentContentType($generator, $contentType);
+    }
+
+    private function getGroupsGenerator(Group $group) {
+        return function() use($group) {
             while($group !== null) {
                 yield $group;
                 $group = $group->getParent();
             }
         };
-
-        return $this->implementation->explainPermissions($generator, $key);
     }
 
     /**
@@ -94,6 +108,21 @@ class Permissions {
     }
 
     /**
+     * Returns a list of content types referenced by the application.
+     *
+     * @return array
+     */
+    public function getAllContentTypes(): array {
+        $permissions = $this->getAllPermissions();
+        $contentTypes = [];
+        foreach($permissions as $permission) {
+            list($contentType, $action) = explode('.', $permission);
+            $contentTypes[] = $contentType;
+        }
+        return array_unique($contentTypes);
+    }
+
+    /**
      * Returns an array whose keys are all the possible actions, regardless of content type.
      * @return array|null
      */
@@ -121,13 +150,15 @@ class Permissions {
             $middleware = $route->gatherMiddleware();
             foreach($middleware as $m) {
                 if(str_starts_with($m, 'oxygen.permissions:')) {
-                    return explode(':', $m)[1];
+                    return [explode(':', $m)[1]];
+                } else if(str_starts_with($m, 'oxygen.ownerPermissions:')) {
+                    return explode(',', explode(':', $m)[1]);
                 }
             }
-            return '';
+            return [];
         }, $this->router->getRoutes()->getRoutes());
 
-        $permissionsFromRoutes = array_filter($permissionsStrings, function($row) { return $row !== ''; });
+        $permissionsFromRoutes = array_merge(...$permissionsStrings);
 
         $this->allPermissions = array_unique(array_merge($this->extraPermissions, $permissionsFromRoutes));
 

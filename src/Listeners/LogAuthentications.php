@@ -54,7 +54,6 @@ class LogAuthentications {
         $ip = $this->request->ip();
         $userAgent = $this->request->userAgent();
 
-
         $authenticationLog = new AuthenticationLogEntry();
         $authenticationLog->setIpAddress($ip);
         $authenticationLog->setUserAgent($userAgent);

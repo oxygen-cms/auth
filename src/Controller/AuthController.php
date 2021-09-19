@@ -107,6 +107,19 @@ class AuthController extends Controller {
     }
 
     /**
+     * Returns preferences used to customize the login frontend view.
+     *
+     * @param PreferencesManager $preferencesManager
+     * @return JsonResponse
+     * @throws \Oxygen\Preferences\PreferenceNotFoundException
+     */
+    public function getLoginPreferences(PreferencesManager $preferencesManager) {
+        return response()->json([
+            'theme' => $preferencesManager->get('appearance.auth::theme')
+        ]);
+    }
+
+    /**
      * @param Guard $guard
      * @return JsonResponse
      */
@@ -209,41 +222,6 @@ class AuthController extends Controller {
                 'status' => Notification::FAILED
             ]);
         }
-    }
-
-    /**
-     * Change the user's password.
-     *
-     * @param AuthManager $auth
-     * @param Request $request
-     * @return JsonResponse
-     * @throws InvalidEntityException
-     */
-    public function putUpdateFullName(AuthManager $auth, Request $request) {
-        $user = $auth->guard()->user();
-        $user->setFullName($request->get('fullName'));
-        $this->repository->persist($user);
-
-        return response()->json([
-            'content' => __('oxygen/auth::messages.fullNameChanged'),
-            'status' => Notification::SUCCESS,
-            'item' => $user->toArray()
-        ]);
-    }
-
-    /**
-     * Deletes the user permanently.
-     *
-     * @return JsonResponse
-     */
-    public function deleteForce(AuthManager $auth) {
-        $user = $auth->guard()->user();
-        $this->repository->delete($user);
-
-        return response()->json([
-            'content' => __('oxygen/auth::messages.account.terminated'),
-            'status' => Notification::SUCCESS
-        ]);
     }
 
 }

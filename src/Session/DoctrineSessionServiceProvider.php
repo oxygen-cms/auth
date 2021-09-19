@@ -15,7 +15,7 @@ class DoctrineSessionServiceProvider extends ServiceProvider {
 
     public function register() {
         $this->app->singleton(DoctrineSessionHandler::class, function() {
-            return new DoctrineSessionHandler($this->app[EntityManager::class], config('session.lifetime'), $this->app);
+            return new DoctrineSessionHandler(config('session.lifetime'), $this->app);
         });
     }
 

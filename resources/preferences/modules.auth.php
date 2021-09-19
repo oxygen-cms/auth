@@ -1,7 +1,7 @@
 <?php
 
-    use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
-    use Oxygen\Preferences\Loader\DatabaseLoader;
+use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
+use Oxygen\Preferences\Loader\DatabaseLoader;
 
 Preferences::register('modules.auth', function($schema) {
     $schema->setTitle('Authentication');

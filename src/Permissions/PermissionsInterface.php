@@ -13,6 +13,13 @@ interface PermissionsInterface {
      * @param string    $key the permissions key in dot notation
      * @return PermissionsExplanation     if the permission is true or false, plus some expanatory data
      */
-    public function explainPermissions(Closure $permissionsGenerator, string $key): PermissionsExplanation;
+    function explainPermissions(Closure $permissionsGenerator, string $key): PermissionsExplanation;
+
+    /**
+     * @param Closure $permissionsGenerator
+     * @param string $contentType
+     * @return string|null
+     */
+    function explainParentContentType(Closure $permissionsGenerator, string $contentType): PermissionsExplanation;
 
 }
