@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Routing\Router;
 use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
 use Oxygen\Preferences\Loader\DatabaseLoader;
 
@@ -9,7 +10,7 @@ Preferences::register('modules.auth', function($schema) {
 
     $routesByName = function() {
         $options = [];
-        foreach(app(\Illuminate\Routing\Router::class)->getRoutes() as $route) {
+        foreach(app(Router::class)->getRoutes() as $route) {
             $name = $route->getName();
             if($name !== null) {
                 $options[$name] = $name;
