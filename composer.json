@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=7.4",
-        "oxygen/core": "~0.12.0",
+        "oxygen/core": "~0.12.1",
         "oxygen/crud": "~0.9.0",
         "oxygen/data": "~0.11.0",
         "oxygen/preferences": "~0.4.2",

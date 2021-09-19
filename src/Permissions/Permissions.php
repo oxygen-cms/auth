@@ -8,17 +8,18 @@ use Illuminate\Routing\Route;
 use Illuminate\Routing\Router;
 use Oxygen\Auth\Entity\Group;
 use Oxygen\Auth\Entity\User;
+use Oxygen\Core\Permissions\PermissionsInterface;
 
-class Permissions {
+class Permissions implements PermissionsInterface {
 
-    private PermissionsInterface $implementation;
+    private PermissionsImplementation $implementation;
     private AuthManager $auth;
     private Router $router;
     private ?array $allPermissions = null;
     private ?array $allActions = null;
     private array $extraPermissions = [];
 
-    public function __construct(PermissionsInterface $implementation, AuthManager $auth, Router $router) {
+    public function __construct(PermissionsImplementation $implementation, AuthManager $auth, Router $router) {
         $this->implementation = $implementation;
         $this->auth = $auth;
         $this->router = $router;

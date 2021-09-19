@@ -4,7 +4,7 @@ namespace Oxygen\Auth\Permissions;
 
 use Closure;
 
-interface PermissionsInterface {
+interface PermissionsImplementation {
 
     /**
      * Gets the value for the provided permissions key.

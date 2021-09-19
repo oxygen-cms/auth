@@ -22,7 +22,7 @@ use RuntimeException;
  *
  * @package Oxygen\Auth\Permissions
  */
-class TreePermissionsSystem implements PermissionsInterface {
+class TreePermissionsSystem implements PermissionsImplementation {
 
     const ROOT_CONTENT_TYPE = '_root';
     const PARENT_KEY = '_parent';

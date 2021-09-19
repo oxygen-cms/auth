@@ -22,7 +22,7 @@ use Oxygen\Auth\Middleware\RedirectIfAuthenticated;
 use Oxygen\Auth\Middleware\RequireTwoFactorDisabled;
 use Oxygen\Auth\Middleware\RequireTwoFactorEnabled;
 use Oxygen\Auth\Permissions\Permissions;
-use Oxygen\Auth\Permissions\PermissionsInterface;
+use Oxygen\Auth\Permissions\PermissionsImplementation;
 use Oxygen\Auth\Permissions\TreePermissionsSystem;
 use Oxygen\Auth\Repository\AuthenticationLogEntryRepositoryInterface;
 use Oxygen\Auth\Repository\DoctrineAuthenticationLogEntryRepository;
@@ -95,7 +95,7 @@ class AuthServiceProvider extends BaseServiceProvider {
 		$this->loadEntitiesFrom(__DIR__ . '/Entity');
 
 		// Permissions System
-        $this->app->bind(PermissionsInterface::class, TreePermissionsSystem::class);
+        $this->app->bind(PermissionsImplementation::class, TreePermissionsSystem::class);
         $this->app->singleton(Permissions::class);
 
         // Repositories
@@ -111,7 +111,7 @@ class AuthServiceProvider extends BaseServiceProvider {
      */
 	public function provides() {
 	    return [
-            PermissionsInterface::class,
+            PermissionsImplementation::class,
             UserRepositoryInterface::class,
             GroupRepositoryInterface::class,
             AuthenticationLogEntryRepositoryInterface::class
