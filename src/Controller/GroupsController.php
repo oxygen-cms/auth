@@ -4,8 +4,6 @@ namespace Oxygen\Auth\Controller;
 
 use Illuminate\Routing\Controller;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
-use Oxygen\Core\Blueprint\BlueprintManager;
-use Oxygen\Crud\Controller\SoftDeleteCrudController;
 use OxygenModule\Auth\Fields\GroupFieldSet;
 use Oxygen\Crud\Controller\BasicCrudApi;
 use Oxygen\Crud\Controller\SoftDeleteCrudApi;

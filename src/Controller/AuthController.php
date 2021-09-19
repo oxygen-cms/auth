@@ -24,7 +24,6 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 class AuthController extends Controller {
 
-    use Confirms2FACode;
     use ThrottlesLogins;
 
     private UserRepositoryInterface $repository;
@@ -150,10 +149,9 @@ class AuthController extends Controller {
      * Confirms the user has successfully setup two-factor authentication.
      *
      * @param Request $request
-     * @param PreferencesManager $preferences
      * @return JsonResponse
      */
-    public function postConfirmTwoFactor(Request $request, PreferencesManager $preferences) {
+    public function postConfirmTwoFactor(Request $request) {
         $code = str_replace(' ', '', $request->input('2fa_code'));
         $activated = $request->user()->confirmTwoFactorAuth($code);
 
