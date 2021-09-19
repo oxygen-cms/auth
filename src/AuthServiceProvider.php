@@ -30,6 +30,7 @@ use Oxygen\Auth\Repository\DoctrineGroupRepository;
 use Oxygen\Auth\Repository\DoctrineUserRepository;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
+use Oxygen\Core\Permissions\PermissionsInterface;
 use Oxygen\Data\BaseServiceProvider;
 use Oxygen\Preferences\PreferencesManager;
 use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
@@ -97,6 +98,9 @@ class AuthServiceProvider extends BaseServiceProvider {
 		// Permissions System
         $this->app->bind(PermissionsImplementation::class, TreePermissionsSystem::class);
         $this->app->singleton(Permissions::class);
+
+        // Inject our permissions system into the core.
+        $this->app->bind(PermissionsInterface::class, Permissions::class);
 
         // Repositories
         $this->app->bind(UserRepositoryInterface::class, DoctrineUserRepository::class);
