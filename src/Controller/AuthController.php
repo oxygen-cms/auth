@@ -2,18 +2,13 @@
 
 namespace Oxygen\Auth\Controller;
 
-use DarkGhostHunter\Laraguard\Http\Controllers\Confirms2FACode;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Session\SessionManager;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
