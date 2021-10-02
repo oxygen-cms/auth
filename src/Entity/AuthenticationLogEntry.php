@@ -3,11 +3,22 @@
 
 namespace Oxygen\Auth\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping AS ORM;
 use Oxygen\Data\Behaviour\Accessors;
 use Oxygen\Data\Behaviour\PrimaryKey;
 
 /**
+ * @method int getType()
+ * @method void setIpAddress(string $address)
+ * @method void setUserAgent(string $userAgent)
+ * @method void setUser(?User $user)
+ * @method void setUsername(?string $username)
+ * @method void setType(int $type)
+ * @method DateTime getTimestamp()
+ * @method string getIpAddress()
+ * @method string getUserAgent()
+ *
  * @ORM\Entity
  * @ORM\Table(name="auth_log")
  */

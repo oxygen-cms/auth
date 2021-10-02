@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Routing\ResponseFactory;
+use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 use Oxygen\Preferences\PreferencesManager;
 
@@ -29,12 +29,12 @@ class RequireTwoFactorDisabled {
      *
      * @var ResponseFactory
      */
-    protected $response;
+    protected ResponseFactory $response;
 
     /**
      * Create a new middleware instance.
      *
-     * @param Authenticatable|null  $user
+     * @param Authenticatable|null $user
      * @param ResponseFactory $response
      */
     public function __construct(ResponseFactory $response, Authenticatable $user = null) {
@@ -45,9 +45,9 @@ class RequireTwoFactorDisabled {
     /**
      * Handle an incoming request.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @param Closure $next
-     * @param  string  $redirectToRoute
+     * @param string $redirectToRoute
      * @return JsonResponse|RedirectResponse|mixed
      */
     public function handle($request, Closure $next, $redirectToRoute = null) {

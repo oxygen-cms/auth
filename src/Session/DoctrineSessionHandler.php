@@ -2,12 +2,11 @@
 
 namespace Oxygen\Auth\Session;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Session\ExistenceAwareInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\InteractsWithTime;
@@ -30,9 +29,9 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     /**
      * The container instance.
      *
-     * @var \Illuminate\Contracts\Container\Container
+     * @var Container|null
      */
-    protected $container;
+    protected ?Container $container;
 
     /**
      * The existence state of the session.
@@ -40,15 +39,15 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * @var bool
      */
     protected $exists;
+
     /**
      * @var EntityManagerInterface|null
      */
-    private $em;
+    private ?EntityManagerInterface $em;
 
     /**
      * Create a new database session handler instance.
      *
-     * @param EntityManager $em
      * @param int $minutes
      * @param Container|null $container
      */
@@ -113,12 +112,10 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      *
      * @param string $sessionId
      * @param string $data
-     * @param $updateAuxiliaryInfo
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @param callable $updateAuxiliaryInfo
+     * @throws BindingResolutionException
      */
-    protected function performUpdate($sessionId, string $data, $updateAuxiliaryInfo) {
+    protected function performUpdate($sessionId, string $data, callable $updateAuxiliaryInfo) {
         $session = $this->getEntityManager()->find(DoctrineSession::class, $sessionId);
         if($session === null) {
             $session = new DoctrineSession($sessionId, $data);
@@ -212,6 +209,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
             ->setParameter('staleTime', $this->getStaleTime($lifetime))
             ->getQuery()
             ->execute();
+        return true;
     }
 
     /**
@@ -227,6 +225,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * Get a fresh query builder instance for the table.
      *
      * @return QueryBuilder
+     * @throws BindingResolutionException
      */
     protected function getQuery() {
         return $this->getEntityManager()->createQueryBuilder();
@@ -249,6 +248,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      *
      * @param User $user
      * @return int|mixed|string
+     * @throws BindingResolutionException
      */
     public function getSessionsForUser(User $user) {
         return $this->getQuery()->select('o')

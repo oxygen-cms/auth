@@ -5,10 +5,14 @@ namespace Oxygen\Auth\Listeners;
 use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Oxygen\Auth\Entity\User;
+use Webmozart\Assert\Assert;
 
 class EnforceTwoFactorAuth {
     public function handle(Validated $event) {
-        if(!$event->user->hasTwoFactorEnabled()) {
+        $user = $event->user;
+        Assert::isInstanceOf($user, User::class);
+        if(!$user->hasTwoFactorEnabled()) {
             return;
         }
 

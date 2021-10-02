@@ -4,11 +4,13 @@ namespace Oxygen\Auth\Preferences;
 
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Support\Arr;
+use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
 use Oxygen\Preferences\ChainedStore;
 use Oxygen\Preferences\Loader\LoaderInterface;
 use Oxygen\Preferences\PreferencesSettingInterface;
+use Webmozart\Assert\Assert;
 
 class UserLoader implements LoaderInterface, PreferencesSettingInterface {
 
@@ -51,9 +53,9 @@ class UserLoader implements LoaderInterface, PreferencesSettingInterface {
             // we look through the User's preferences, then the Group's preferences,
             // then successive parent groups. Until we find the preference item which we want.
             $chain = function() {
-                $prefs = $this->auth->user()->getPreferences();
+                $prefs = $this->getUser()->getPreferences();
                 yield Arr::get($prefs, $this->prefix, []);
-                $group = $this->auth->user()->getGroup();
+                $group = $this->getUser()->getGroup();
                 while($group !== null) {
                     yield Arr::get($group->getPreferences(), $this->prefix, []);
                     $group = $group->getParent();
@@ -72,7 +74,7 @@ class UserLoader implements LoaderInterface, PreferencesSettingInterface {
      * @throws InvalidEntityException
      */
     public function store() {
-        $user = $this->auth->user();
+        $user = $this->getUser();
         $this->users->persist($user);
     }
 
@@ -80,13 +82,20 @@ class UserLoader implements LoaderInterface, PreferencesSettingInterface {
      * Sets the preferences value.
      *
      * @param string $key
-     * @param $value
+     * @param mixed $value
      * @return void
      */
     public function set(string $key, $value) {
-        $user = $this->auth->user();
+        $user = $this->getUser();
         $prefs = $user->getPreferences();
         Arr::set($prefs, ltrim($this->prefix . '.' . $key, '.'), $value);
         $user->setPreferences($prefs);
     }
+
+    private function getUser(): User {
+        $user = $this->auth->user();
+        Assert::isInstanceOf($user, User::class);
+        return $user;
+    }
+
 }

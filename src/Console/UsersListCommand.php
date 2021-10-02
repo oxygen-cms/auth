@@ -75,8 +75,8 @@ class UsersListCommand extends Command {
                 'emailVerified' => $user->hasVerifiedEmail() ? '<fg=green>Yes</>' : '-',
                 'twoFactorAuth' => $user->hasTwoFactorEnabled() ? '<fg=green>Yes</>' : '-',
                 'lastLogin' => $lastLogin,
-                'createdAt' => $user->getCreatedAt() !== null ? $user->getCreatedAt()->format(self::DATE_FORMAT) : null,
-                'updatedAt' => $user->getUpdatedAt() !== null ? $user->getUpdatedAt()->format(self::DATE_FORMAT) : null
+                'createdAt' => $user->getCreatedAt()->format(self::DATE_FORMAT),
+                'updatedAt' => $user->getUpdatedAt()->format(self::DATE_FORMAT)
             ];
         }, $users);
 

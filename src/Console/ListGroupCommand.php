@@ -68,8 +68,8 @@ class ListGroupCommand extends Command {
                 'users' => '<fg=blue>' . $group->getUsers()->count() . '</> members',
                 'parent' => $parent ? $parent->getNickname() : '-',
                 'children' => implode(', ' ,$group->getChildren()->map(function(Group $child) { return $child->getNickname(); })->toArray()),
-                'createdAt' => $group->getCreatedAt() !== null ? $group->getCreatedAt()->format(self::DATE_FORMAT) : null,
-                'updatedAt' => $group->getUpdatedAt() !== null ? $group->getUpdatedAt()->format(self::DATE_FORMAT) : null
+                'createdAt' => $group->getCreatedAt()->format(self::DATE_FORMAT),
+                'updatedAt' => $group->getUpdatedAt()->format(self::DATE_FORMAT)
             ];
         }, $groups);
 

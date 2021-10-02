@@ -18,14 +18,16 @@ class PermissionsExplanation {
 
     /**
      * @param bool|string $value
-     * @param PermissionsSource|null $source if the permissions value came from a particular source
-     * @param string|null $contentType
-     * @param string|null $action
      */
     public function __construct($value) {
         $this->value = $value;
     }
 
+    /**
+     * @param PermissionsSource $originalSource
+     * @param string $originalContentType
+     * @param string $originalAction
+     */
     public function setRequestedInfo(PermissionsSource $originalSource, string $originalContentType, string $originalAction) {
         $this->originalSource = $originalSource;
         $this->originalContentType = $originalContentType;
@@ -84,6 +86,9 @@ class PermissionsExplanation {
      * @return string|null
      */
     public function getKey(): ?string {
+        if($this->contentType === null || $this->action === null) {
+            return null;
+        }
         return $this->contentType . '.' . $this->action;
     }
 
@@ -92,7 +97,10 @@ class PermissionsExplanation {
      *
      * @return string|null
      */
-    public function getRequestedKey(): string {
+    public function getRequestedKey(): ?string {
+        if($this->originalContentType === null || $this->originalAction === null) {
+            return null;
+        }
         return $this->originalContentType . '.' . $this->originalAction;
     }
 
@@ -148,7 +156,7 @@ class PermissionsExplanation {
      * @param PermissionsExplanation $other
      * @return bool true if the two are equal
      */
-    public function equals(PermissionsExplanation $other) {
+    public function equals(PermissionsExplanation $other): bool {
         return $this->value === $other->getValue() && $this->getSource() === $other->getSource() && $this->getOriginalSource() === $other->getOriginalSource() && $this->getKey() === $other->getKey() && $this->getRequestedKey() === $other->getRequestedKey();
     }
 

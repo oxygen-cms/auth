@@ -21,10 +21,12 @@
         "oxygen/preferences": "~0.5.0",
         "illuminate/support": "~6.0",
         "laravel/sanctum": "^2.11",
+        "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
         "darkghosthunter/laraguard": "dev-master",
         "ext-json": "*",
         "ext-zip": "*",
-        "lab404/laravel-impersonate": "^1.7"
+        "lab404/laravel-impersonate": "^1.7",
+        "webmozart/assert": "^1.10"
     },
     "autoload": {
         "psr-4": {
@@ -53,9 +55,11 @@
     ],
     "require-dev": {
         "phpstan/phpstan": "^0.12.18",
-        "phpspec/phpspec": "^6.1"
+        "phpspec/phpspec": "^6.1",
+        "phpstan/extension-installer": "^1.1",
+        "phpstan/phpstan-webmozart-assert": "^0.12.16"
     },
     "scripts": {
-        "test": "vendor/bin/phpspec run && vendor/bin/phpstan analyze src --level 1 --memory-limit 256M"
+        "test": "vendor/bin/phpspec run && vendor/bin/phpstan analyze src --level 5 --memory-limit 256M"
     }
 }

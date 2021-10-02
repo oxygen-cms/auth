@@ -3,6 +3,7 @@
 namespace Oxygen\Auth\Permissions;
 
 use Closure;
+use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -67,15 +68,20 @@ class TreePermissionsSystem implements PermissionsImplementation {
         return null;
     }
 
+    /**
+     * @throws Exception
+     */
     private function getOriginalSource(Closure $permissionsGenerator): PermissionsSource {
         $generator = $permissionsGenerator();
         foreach($generator as $item) { return $item; }
+        throw new Exception('permissions generator has zero sources');
     }
 
     /**
      * @param Closure $permissionsGenerator
      * @param string $contentType
      * @return PermissionsExplanation
+     * @throws Exception
      */
     public function explainParentContentType(Closure $permissionsGenerator, string $contentType): PermissionsExplanation {
         $explanation = $this->getPermissionsValue($permissionsGenerator, $contentType, self::PARENT_KEY);

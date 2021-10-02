@@ -11,14 +11,14 @@ interface PermissionsImplementation {
      *
      * @param Closure   $permissionsGenerator a generator which returns permissions arrays to check, in reverse-order of inheritance
      * @param string    $key the permissions key in dot notation
-     * @return PermissionsExplanation     if the permission is true or false, plus some expanatory data
+     * @return PermissionsExplanation     if the permission is true or false, plus some explanatory data
      */
     function explainPermissions(Closure $permissionsGenerator, string $key): PermissionsExplanation;
 
     /**
      * @param Closure $permissionsGenerator
      * @param string $contentType
-     * @return string|null
+     * @return PermissionsExplanation
      */
     function explainParentContentType(Closure $permissionsGenerator, string $contentType): PermissionsExplanation;
 

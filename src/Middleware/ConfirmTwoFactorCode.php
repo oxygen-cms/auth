@@ -7,40 +7,41 @@
 namespace Oxygen\Auth\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
+use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Routing\ResponseFactory;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 
 class ConfirmTwoFactorCode {
     /**
      * The response factory instance.
      *
-     * @var \Illuminate\Contracts\Routing\ResponseFactory
+     * @var ResponseFactory
      */
-    protected $response;
+    protected ResponseFactory $response;
 
     /**
      * The URL generator instance.
      *
-     * @var \Illuminate\Contracts\Routing\UrlGenerator
+     * @var UrlGenerator
      */
-    protected $url;
+    protected UrlGenerator $url;
 
     /**
      * Current user authenticated.
      *
-     * @var \Illuminate\Contracts\Auth\Authenticatable|\DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable
+     * @var Authenticatable|TwoFactorAuthenticatable
      */
     protected $user;
 
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Routing\ResponseFactory  $response
-     * @param  \Illuminate\Contracts\Routing\UrlGenerator  $url
-     * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
+     * @param ResponseFactory $response
+     * @param UrlGenerator $url
+     * @param Authenticatable|null $user
      */
     public function __construct(ResponseFactory $response, UrlGenerator $url, Authenticatable $user = null) {
         $this->response = $response;
@@ -51,8 +52,8 @@ class ConfirmTwoFactorCode {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
+     * @param Closure $next
      * @param  string  $redirectToRoute
      * @return mixed
      */
@@ -79,7 +80,7 @@ class ConfirmTwoFactorCode {
     /**
      * Determine if the confirmation timeout has expired.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return bool
      */
     protected function codeWasValidated($request) {

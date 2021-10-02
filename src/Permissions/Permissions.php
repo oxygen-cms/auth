@@ -9,6 +9,7 @@ use Illuminate\Routing\Router;
 use Oxygen\Auth\Entity\Group;
 use Oxygen\Auth\Entity\User;
 use Oxygen\Core\Permissions\PermissionsInterface;
+use Webmozart\Assert\Assert;
 
 class Permissions implements PermissionsInterface {
 
@@ -85,16 +86,19 @@ class Permissions implements PermissionsInterface {
      * @return boolean
      */
     public function has(string $key): bool {
-        return $this->hasForUser($this->auth->guard()->user(), $key);
+        $user = $this->auth->guard()->user();
+        Assert::isInstanceOf($user, User::class);
+
+        return $this->hasForUser($user, $key);
     }
 
     /**
      * Registers a permission with key $key as recognised by the application.
      * Permissions used by the `oxygen.permissions` route-middleware are automatically recognised.
      *
-     * @param $key
+     * @param string $key
      */
-    public function registerPermission($key) {
+    public function registerPermission(string $key) {
         $this->extraPermissions[] = $key;
     }
 
@@ -125,7 +129,7 @@ class Permissions implements PermissionsInterface {
 
     /**
      * Returns an array whose keys are all the possible actions, regardless of content type.
-     * @return array|null
+     * @return array
      */
     public function getAllActions(): array {
         if($this->allActions === null) {

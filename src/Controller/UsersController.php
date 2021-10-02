@@ -4,6 +4,7 @@ namespace Oxygen\Auth\Controller;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Auth\Passwords\TokenRepositoryInterface;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Guard;
@@ -20,6 +21,7 @@ use Oxygen\Crud\Controller\BasicCrudApi;
 use Oxygen\Crud\Controller\SoftDeleteCrudApi;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
+use Webmozart\Assert\Assert;
 
 class UsersController extends Controller {
 
@@ -36,6 +38,7 @@ class UsersController extends Controller {
         'resource' => 'User',
         'pluralResource' => 'Users'
     ];
+    private UserRepositoryInterface $repository;
 
     /**
      * Constructs the PagesController.
@@ -51,9 +54,9 @@ class UsersController extends Controller {
      * Creates a new Resource - returns JSON response.
      *
      * @return JsonResponse
-     * @throws Exception
+     * @throws \Exception|InvalidEntityException
      */
-    public function postCreateApi(Request $request, \Illuminate\Auth\Passwords\PasswordBroker $passwordBroker) {
+    public function postCreateApi(Request $request, PasswordBroker $passwordBroker) {
         $item = $this->repository->make();
         $item->fromArray($request->except(['_token']));
         $item->setPassword(Str::random(self::INITIAL_RANDOM_PASSWORD_LENGTH));
@@ -72,12 +75,12 @@ class UsersController extends Controller {
     /**
      * Change the user's password.
      *
-     * @param AuthManager $auth
+     * @param User $user
      * @param Request $request
      * @return JsonResponse
      * @throws InvalidEntityException
      */
-    public function putUpdateFullName(User $user, AuthManager $auth, Request $request) {
+    public function putUpdateFullName(User $user, Request $request) {
         $user->setFullName($request->get('fullName'));
         $this->repository->persist($user);
 
@@ -91,8 +94,9 @@ class UsersController extends Controller {
     /**
      * Deletes an entity.
      *
-     * @param User $user the item
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $item the item
+     * @return JsonResponse
+     * @throws InvalidEntityException
      */
     public function deleteDeleteApi($item) {
         $user = $this->repository->find($item);
@@ -107,7 +111,7 @@ class UsersController extends Controller {
 
     /**
      * Deletes a user permanently.
-     * @param User $user
+     * @param int $item
      * @return JsonResponse
      */
     public function deleteForce($item) {
@@ -129,6 +133,7 @@ class UsersController extends Controller {
      */
     public function postImpersonate($otherUser, Guard $auth, ImpersonateManager $manager) {
         $otherUser = $this->repository->find($otherUser);
+        Assert::isInstanceOf($otherUser, User::class);
         if($auth->user() === $otherUser) {
             return response()->json(['content' => __('oxygen/auth::messages.cannotImpersonateSameUser'), 'status' => 'failed'], 400);
         }
@@ -152,6 +157,7 @@ class UsersController extends Controller {
             $manager->leave();
 
             $user = $auth->guard('web')->user();
+            Assert::isInstanceOf($user, User::class);
             return response()->json([
                 'content' => __('oxygen/auth::messages.impersonationStopped', ['name' => $user->getFullName()]),
                 'status' => 'success',

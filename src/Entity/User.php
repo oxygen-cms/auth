@@ -5,6 +5,7 @@ namespace Oxygen\Auth\Entity;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
 use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
 use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping AS ORM;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
+use LaravelDoctrine\ORM\Contracts\UrlRoutable;
 use LaravelDoctrine\ORM\Notifications\Notifiable;
 use Oxygen\Auth\Permissions\OwnedByUser;
 use Oxygen\Auth\Permissions\Permissions;
@@ -32,11 +34,17 @@ use DateTime;
 use Illuminate\Auth\Notifications\VerifyEmail;
 
 /**
+ * @method string getEmail()
+ * @method string getUsername()
+ * @method string|null getFullName()
+ * @method Collection getAuthenticationLogEntries()
+ * @method void setFullName(string $fullName)
+ *
  * @ORM\Entity
  * @ORM\Table(name="users")
  * @ORM\HasLifecycleCallbacks
  */
-class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail, \LaravelDoctrine\ORM\Contracts\UrlRoutable, OwnedByUser {
+class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail, UrlRoutable, OwnedByUser {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Preferences;
     use Notifiable;
@@ -70,6 +78,14 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
      * @var DateTimeInterface
      */
     protected $verifiedAt;
+
+    /**
+     * Initializes default model values.
+     */
+    public function __construct() {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * Returns an array of validation rules used to validate the model.
@@ -165,9 +181,8 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     }
 
     /**
-     * Return true or false if the user can be impersonate.
+     * Return true or false if the user can be impersonated.
      *
-     * @param void
      * @return bool
      */
     public function canBeImpersonated(): bool {
@@ -203,8 +218,8 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
             'preferences' => $this->getMergedPreferences(),
             'permissions' => $this->group->getMergedPermissions(),
             'group' => $this->group->toArray(),
-            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(DateTimeInterface::ATOM) : null,
-            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(DateTimeInterface::ATOM) : null,
+            'createdAt' => $this->createdAt->format(DateTimeInterface::ATOM),
+            'updatedAt' => $this->updatedAt->format(DateTimeInterface::ATOM),
             'deletedAt' => $this->deletedAt !== null ? $this->deletedAt->format(DateTimeInterface::ATOM) : null,
             'emailVerified' => $this->hasVerifiedEmail(),
             'twoFactorAuthEnabled' => $this->hasTwoFactorEnabled()
@@ -270,6 +285,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
 
     /**
      * @param int|Group $group
+     * @throws InvalidEntityException
      */
     public function setGroup($group): void {
         if(is_integer($group)) {

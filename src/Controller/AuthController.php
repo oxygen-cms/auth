@@ -4,32 +4,40 @@ namespace Oxygen\Auth\Controller;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Factory;
 use Illuminate\Validation\ValidationException;
 use Lab404\Impersonate\Services\ImpersonateManager;
+use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
+use Oxygen\Preferences\PreferenceNotFoundException;
 use Oxygen\Preferences\PreferencesManager;
 use Illuminate\Routing\Controller;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Webmozart\Assert\Assert;
 
 class AuthController extends Controller {
 
     use ThrottlesLogins;
 
     private UserRepositoryInterface $repository;
+    private AuthManager $auth;
 
     /**
      * Constructs the AuthController.
      *
      * @param UserRepositoryInterface $repository
+     * @param AuthManager $auth
      */
-    public function __construct(UserRepositoryInterface $repository) {
+    public function __construct(UserRepositoryInterface $repository, AuthManager $auth) {
         $this->repository = $repository;
+        $this->auth = $auth;
     }
 
     /**
@@ -46,14 +54,13 @@ class AuthController extends Controller {
      * Login action.
      *
      * @param Request $request
-     * @param AuthManager $auth
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function postLogin(Request $request, AuthManager $auth) {
-        if($auth->guard()->check()) {
+    public function postLogin(Request $request) {
+        if($this->auth->guard()->check()) {
             // if we're already logged in, then return right away
-            return $this->makeAuthenticatedLoginResponse($auth->guard());
+            return $this->makeAuthenticatedLoginResponse();
         }
 
         // we are just trying to see if we are already authenticated,
@@ -76,14 +83,17 @@ class AuthController extends Controller {
                 'password' => $request->input('password')
             ];
 
-            if($auth->guard()->attempt($credentials)) {
-                if($auth->guard()->user()->isDeleted()) {
-                    $auth->guard()->logout();
+            $statefulGuard = $this->auth->guard();
+            Assert::isInstanceOf($statefulGuard, StatefulGuard::class);
+
+            if($statefulGuard->attempt($credentials)) {
+                if($this->getUser()->isDeleted()) {
+                    $statefulGuard->logout();
                     return response()->json([
                         'code' => 'account_deactivated'
                     ], 401);
                 }
-                return $this->makeAuthenticatedLoginResponse($auth->guard());
+                return $this->makeAuthenticatedLoginResponse();
             } else {
                 $this->incrementLoginAttempts($request);
 
@@ -105,7 +115,7 @@ class AuthController extends Controller {
      *
      * @param PreferencesManager $preferencesManager
      * @return JsonResponse
-     * @throws \Oxygen\Preferences\PreferenceNotFoundException
+     * @throws PreferenceNotFoundException
      */
     public function getLoginPreferences(PreferencesManager $preferencesManager) {
         return response()->json([
@@ -114,12 +124,11 @@ class AuthController extends Controller {
     }
 
     /**
-     * @param Guard $guard
      * @return JsonResponse
      */
-    public function makeAuthenticatedLoginResponse(Guard $guard) {
+    public function makeAuthenticatedLoginResponse(): JsonResponse {
         return response()->json([
-            'user' => $guard->user()->toArray(),
+            'user' => $this->getUser()->toArray(),
             'impersonating' => app(ImpersonateManager::class)->isImpersonating()
         ]);
     }
@@ -166,12 +175,13 @@ class AuthController extends Controller {
     /**
      * Log the user out.
      *
-     * @param AuthManager $auth
      * @param Request $request
-     * @return mixed
+     * @return Response
      */
-    public function postLogout(AuthManager $auth, Request $request) {
-        $auth->guard('web')->logout();
+    public function postLogout(Request $request) {
+        $statefulGuard = $this->auth->guard('web');
+        Assert::isInstanceOf($statefulGuard, StatefulGuard::class);
+        $statefulGuard->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -182,14 +192,13 @@ class AuthController extends Controller {
     /**
      * Change the user's password.
      *
-     * @param AuthManager $auth
      * @param Request $request
      * @param Factory $validationFactory
      * @return JsonResponse
      * @throws InvalidEntityException
      */
-    public function postChangePassword(AuthManager $auth, Request $request, Factory $validationFactory) {
-        $user = $auth->guard()->user();
+    public function postChangePassword(Request $request, Factory $validationFactory) {
+        $user = $this->getUser();
         $input = $request->all();
 
         $validator = $validationFactory->make(
@@ -215,6 +224,12 @@ class AuthController extends Controller {
                 'status' => Notification::FAILED
             ]);
         }
+    }
+
+    private function getUser() {
+        $user = $this->auth->guard()->user();
+        Assert::isInstanceOf($user, User::class);
+        return $user;
     }
 
 }

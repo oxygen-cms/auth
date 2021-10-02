@@ -2,6 +2,7 @@
 
 namespace Oxygen\Auth\Controller;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
@@ -57,8 +58,7 @@ class PasswordController extends Controller {
      *
      * @param Request $request
      * @param PasswordBroker $password
-     * @return Response
-     * @throws BlueprintNotFoundException
+     * @return JsonResponse
      */
     public function postReset(Request $request, PasswordBroker $password) {
         $request->validate([

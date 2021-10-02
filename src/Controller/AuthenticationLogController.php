@@ -14,9 +14,11 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Oxygen\Auth\Entity\AuthenticationLogEntry;
 use Oxygen\Auth\Entity\DoctrineSession;
+use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Repository\AuthenticationLogEntryRepositoryInterface;
 use Oxygen\Auth\Session\DoctrineSessionHandler;
 use Oxygen\Core\Http\Notification;
+use Webmozart\Assert\Assert;
 
 class AuthenticationLogController extends Controller {
 
@@ -29,7 +31,9 @@ class AuthenticationLogController extends Controller {
      * @return JsonResponse
      */
     public function getAuthenticationLogEntries(AuthenticationLogEntryRepositoryInterface $entries) {
-        $paginator = $entries->findByUser(auth()->user(), self::AUTHENTICATION_LOG_PER_PAGE);
+        $user = auth()->user();
+        Assert::isInstanceOf($user, User::class);
+        $paginator = $entries->findByUser($user, self::AUTHENTICATION_LOG_PER_PAGE);
 
         return response()->json([
             'items' => array_map(function(AuthenticationLogEntry $e) { return $e->toArray(); }, $paginator->items()),

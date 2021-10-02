@@ -2,21 +2,20 @@
 
 namespace Oxygen\Auth\Middleware;
 
+use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Oxygen\Auth\Permissions\Permissions as PermissionsService;
-use Oxygen\Core\Contracts\Routing\ResponseFactory;
-use Oxygen\Core\Http\Notification;
-use Oxygen\Core\Translation\Translator;
-use Oxygen\Preferences\PreferenceNotFoundException;
 use Oxygen\Preferences\PreferencesManager;
 use Oxygen\Auth\Permissions\OwnedByUser;
+use Webmozart\Assert\Assert;
 
 class OwnerPermissions {
 
     /**
      * @var PreferencesManager
      */
-    private $preferences;
+    private PreferencesManager $preferences;
 
     private PermissionsService $permissions;
 
@@ -35,12 +34,15 @@ class OwnerPermissions {
      * @param Request $request
      * @param Closure $next
      * @param string $permission
+     * @param string $permissionIfOwned
+     * @param mixed ...$models
      * @return mixed
-     * @throws PreferenceNotFoundException
      */
-    public function handle(Request $request, \Closure $next, string $permission, string $permissionIfOwned, ...$models) {
+    public function handle(Request $request, Closure $next, string $permission, string $permissionIfOwned, ...$models) {
         $owned = true;
-        foreach($request->route()->parameters() as $parameter) {
+        $route = $request->route();
+        Assert::isInstanceOf($route, Route::class);
+        foreach($route->parameters() as $parameter) {
             if(!($parameter instanceof OwnedByUser) || $parameter->getOwner() != $request->user()) {
                 $owned = false;
             }

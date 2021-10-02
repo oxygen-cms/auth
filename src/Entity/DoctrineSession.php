@@ -57,10 +57,10 @@ class DoctrineSession {
     /**
      * Returns true if the session is expired
      *
-     * @param $minutes
+     * @param int $minutes
      * @return bool
      */
-    public function expired($minutes): bool {
+    public function expired(int $minutes): bool {
         return new Carbon($this->lastActivity) < Carbon::now()->subMinutes($minutes);
     }
 

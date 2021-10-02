@@ -2,7 +2,10 @@
 
 namespace Oxygen\Auth\Entity;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping AS ORM;
 use Illuminate\Contracts\Support\Arrayable;
@@ -22,11 +25,15 @@ use Oxygen\Data\Validation\Validatable;
 use Oxygen\Data\Behaviour\Searchable;
 
 /**
+ * @method string|null getDescription()
+ * @method string|null getIcon()
+ * @method Collection getUsers()
+ * @method Collection getChildren()
+  *
  * @ORM\Entity
  * @ORM\Table(name="`groups`")
  * @ORM\HasLifecycleCallbacks
  */
-
 class Group implements Validatable, PrimaryKeyInterface, Searchable, PermissionsSource, Arrayable {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
@@ -79,6 +86,8 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
     public function __construct() {
         $this->users = new ArrayCollection();
         $this->children = new ArrayCollection();
+        $this->createdAt = new DateTime();
+        $this->updatedAt = new DateTime();
     }
 
     /**
@@ -166,9 +175,9 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
             'nickname' => $this->nickname,
             'description' => $this->description,
             'icon' => $this->icon,
-            'createdAt' => $this->createdAt !== null ? $this->createdAt->format(\DateTimeInterface::ATOM) : null,
-            'updatedAt' => $this->updatedAt !== null ? $this->updatedAt->format(\DateTimeInterface::ATOM) : null,
-            'deletedAt' => $this->deletedAt !== null ? $this->deletedAt->format(\DateTimeInterface::ATOM) : null
+            'createdAt' => $this->createdAt->format(DateTimeInterface::ATOM),
+            'updatedAt' => $this->updatedAt->format(DateTimeInterface::ATOM),
+            'deletedAt' => $this->deletedAt !== null ? $this->deletedAt->format(DateTimeInterface::ATOM) : null
         ];
     }
 
@@ -180,7 +189,7 @@ class Group implements Validatable, PrimaryKeyInterface, Searchable, Permissions
     }
 
     /**
-     * @param null|Group $parent
+     * @param null|int|Group $parent
      */
     public function setParent($parent) {
         if(is_integer($parent)) {
