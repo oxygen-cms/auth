@@ -75,7 +75,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
 
     /**
      * @ORM\Column(name="email_verified_at", type="datetime", nullable=true)
-     * @var DateTimeInterface
+     * @var DateTimeInterface|null
      */
     protected $verifiedAt;
 
