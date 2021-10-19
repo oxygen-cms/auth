@@ -75,7 +75,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
 
     /**
      * @ORM\Column(name="email_verified_at", type="datetime", nullable=true)
-     * @var DateTimeInterface
+     * @var DateTimeInterface|null
      */
     protected $verifiedAt;
 
@@ -247,6 +247,13 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     public function markEmailAsVerified() {
         $this->verifiedAt = new DateTime();
         return true;
+    }
+
+    /**
+     * Mark the given user's email as not verified.
+     */
+    public function resetVerifiedEmail() {
+        $this->verifiedAt = null;
     }
 
     /**

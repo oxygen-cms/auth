@@ -7,8 +7,8 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Routing\Router;
+use Oxygen\Auth\Console\EditUserCommand;
 use Oxygen\Auth\Console\PermissionsCommand;
 use Oxygen\Auth\Console\ListGroupCommand;
 use Oxygen\Auth\Console\ListSessionCommand;
@@ -33,8 +33,6 @@ use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Core\Permissions\PermissionsInterface;
 use Oxygen\Data\BaseServiceProvider;
 use Oxygen\Preferences\PreferencesManager;
-use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
-use Oxygen\Preferences\Schema;
 use Oxygen\Preferences\SchemaRegistered;
 use Oxygen\Auth\Listeners\EnforceTwoFactorAuth;
 
@@ -70,6 +68,7 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->commands(ListGroupCommand::class);
         $this->commands(ListSessionCommand::class);
         $this->commands(PermissionsCommand::class);
+        $this->commands(EditUserCommand::class);
 
         // each Preferences schema has a corresponding permission which controls access to it
         $dispatcher->listen(SchemaRegistered::class, function(SchemaRegistered $event) {
