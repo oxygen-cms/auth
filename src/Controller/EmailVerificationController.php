@@ -19,7 +19,6 @@ class EmailVerificationController extends Controller {
      * @param Request $request
      * @param UserRepositoryInterface $users
      * @return RedirectResponse
-     *
      * @throws AuthorizationException
      * @throws InvalidEntityException
      */

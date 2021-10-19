@@ -250,6 +250,13 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     }
 
     /**
+     * Mark the given user's email as not verified.
+     */
+    public function resetVerifiedEmail() {
+        $this->verifiedAt = null;
+    }
+
+    /**
      * Send the email verification notification.
      *
      * @return void
