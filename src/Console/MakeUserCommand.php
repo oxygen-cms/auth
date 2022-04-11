@@ -45,8 +45,8 @@ class MakeUserCommand extends Command {
 		$allGroups = $groups->all();
 
 		if(empty($allGroups) && $this->confirm('There are no groups in the database. Would you like to create one? [y|N]')) {
-			$groupName = $this->ask('Group Name');
-			$this->call('make:group', ['name' => $groupName]);
+			$groupName = $this->ask('Group Nickname');
+			$this->call('group:add', ['nickname' => $groupName]);
 			$allGroups = $groups->all();
 		}
 
