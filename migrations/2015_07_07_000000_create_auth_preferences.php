@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
-use Oxygen\Preferences\Repository;
 
 class CreateAuthPreferences extends Migration {
 
@@ -14,16 +13,15 @@ class CreateAuthPreferences extends Migration {
 
         $item = $preferences->make();
         $item->setKey('appearance.auth');
-        $data = new Repository([]);
-        $data->set('theme', 'autumn');
-        $data->set('logo', '/vendor/oxygen/ui-theme/img/icon/apple-touch-icon-180x180.png');
-        $item->setPreferences($data);
+        $item->setPreferences([
+            'theme' => 'autumn',
+            'logo' => '/vendor/oxygen/ui-theme/img/icon/apple-touch-icon-180x180.png'
+        ]);
         $preferences->persist($item, false);
 
         $item = $preferences->make();
         $item->setKey('modules.auth');
-        $data = new Repository([]);
-        $item->setPreferences($data);
+        $item->setPreferences([]);
         $preferences->persist($item, false);
 
         $preferences->flush();
