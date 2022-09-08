@@ -21,7 +21,7 @@
         "oxygen/preferences": "~0.5.0",
         "illuminate/support": "~6.0",
         "laravel/sanctum": "^2.11",
-        "guzzlehttp/guzzle": "^6.3.1|^7.0.1",
+        "guzzlehttp/guzzle": "^7.4.5",
         "darkghosthunter/laraguard": "dev-master",
         "ext-json": "*",
         "ext-zip": "*",
@@ -45,6 +45,9 @@
     "config": {
         "platform": {
             "php": "7.4.0"
+        },
+        "allow-plugins": {
+            "phpstan/extension-installer": true
         }
     },
     "repositories": [
