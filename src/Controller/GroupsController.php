@@ -7,6 +7,7 @@ use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use OxygenModule\Auth\Fields\GroupFieldSet;
 use Oxygen\Crud\Controller\BasicCrudApi;
 use Oxygen\Crud\Controller\SoftDeleteCrudApi;
+use Webmozart\Assert\Assert;
 
 class GroupsController extends Controller {
 
@@ -32,6 +33,7 @@ class GroupsController extends Controller {
      */
     public function __construct(GroupRepositoryInterface $repository) {
         $this->repository = $repository;
+        Assert::isInstanceOf($this->repository, GroupRepositoryInterface::class);
         BasicCrudApi::setupLangMappings(self::LANG_MAPPINGS);
     }
 

@@ -29,21 +29,21 @@ class AuthenticationLogEntry {
     /**
      * The login has succeded.
      *
-     * @var string
+     * @var int
      */
     const LOGIN_SUCCESS = 0;
 
     /**
      * The login has failed.
      *
-     * @var string
+     * @var int
      */
     const LOGIN_FAILED = 1;
 
     /**
      * The logout has succeded.
      *
-     * @var string
+     * @var int
      */
     const LOGOUT = 2;
 

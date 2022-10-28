@@ -6,25 +6,17 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Oxygen\Auth\Permissions\Permissions as PermissionsService;
-use Oxygen\Preferences\PreferencesManager;
 use Oxygen\Auth\Permissions\OwnedByUser;
 use Webmozart\Assert\Assert;
 
 class OwnerPermissions {
 
-    /**
-     * @var PreferencesManager
-     */
-    private PreferencesManager $preferences;
-
     private PermissionsService $permissions;
 
     /**
-     * @param PreferencesManager $preferences
      * @param PermissionsService $permissions
      */
-    public function __construct(PreferencesManager $preferences, PermissionsService $permissions) {
-        $this->preferences = $preferences;
+    public function __construct(PermissionsService $permissions) {
         $this->permissions = $permissions;
     }
 

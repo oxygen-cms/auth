@@ -203,13 +203,13 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
      * {@inheritdoc}
      */
     public function gc($lifetime) {
-        $this->getQuery()
+        $rows = $this->getQuery()
             ->delete(DoctrineSession::class, 'u')
             ->where('u.lastActivity <= :staleTime')
             ->setParameter('staleTime', $this->getStaleTime($lifetime))
             ->getQuery()
             ->execute();
-        return true;
+        return $rows;
     }
 
     /**
