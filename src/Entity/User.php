@@ -226,6 +226,25 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
         ];
     }
 
+    /**
+     * Converts this model to JSON-equivalent array form suitable for returning from API endpoints.
+     *
+     * @return array
+     */
+    public function toArrayPublic() {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'fullName' => $this->fullName,
+            'email' => $this->email,
+            'group' => [
+                'name' => $this->group->getName(),
+                'description' => $this->group->getDescription(),
+            ],
+            'createdAt' => $this->createdAt->format(DateTimeInterface::ATOM)
+        ];
+    }
+
     public function getGroup(): Group {
         return $this->group;
     }

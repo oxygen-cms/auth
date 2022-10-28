@@ -74,6 +74,10 @@ Route::prefix('/oxygen/api/users')->middleware('api_auth')->group(function(Route
     UsersController::registerCrudRoutes($router);
     UsersController::registerSoftDeleteRoutes($router);
 
+    $router->get('{user}/basic', [UsersController::class, 'getInfoApiBasic'])
+        ->name('users.getInfoBasic')
+        ->middleware('oxygen.permissions:users.getInfoBasic');
+
     $router->put('{user}/fullName', [UsersController::class, 'putUpdateFullName'])
         ->name('users.putUpdateFullName')
         ->middleware('oxygen.ownerPermissions:users.putUpdate,users.owner_putUpdateFullName');

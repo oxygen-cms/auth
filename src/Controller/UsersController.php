@@ -51,6 +51,16 @@ class UsersController extends Controller {
     }
 
     /**
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function getInfoApiBasic(User $user): JsonResponse {
+        return response()->json([
+            'item' => $user->toArrayPublic()
+        ]);
+    }
+
+    /**
      * Creates a new Resource - returns JSON response.
      *
      * @return JsonResponse
