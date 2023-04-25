@@ -89,7 +89,9 @@ Route::prefix('/oxygen/api/users')->middleware('api_auth')->group(function(Route
     $router->post('{id}/impersonate', [UsersController::class, 'postImpersonate'])
         ->name('users.postImpersonate')
         ->middleware('oxygen.permissions:users.postImpersonate');
+});
 
+Route::prefix('/oxygen/api/users')->middleware('api_auth_unverified')->group(function(Router $router) {
     $router->post('stop-impersonating', [UsersController::class, 'postLeaveImpersonate'])
         ->name('users.postLeaveImpersonate');
 });
