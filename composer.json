@@ -22,7 +22,7 @@
         "illuminate/support": "~6.0",
         "laravel/sanctum": "^3.2",
         "guzzlehttp/guzzle": "^7.4.5",
-        "darkghosthunter/laraguard": "dev-master",
+        "darkghosthunter/laraguard": "dev-laravel10",
         "ext-json": "*",
         "ext-zip": "*",
         "lab404/laravel-impersonate": "^1.7",
