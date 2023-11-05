@@ -3,14 +3,10 @@
 namespace Oxygen\Auth\Controller;
 
 use Illuminate\Auth\AuthManager;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Passwords\PasswordBroker;
-use Illuminate\Auth\Passwords\TokenRepositoryInterface;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Lab404\Impersonate\Services\ImpersonateManager;
 use Oxygen\Auth\Entity\User;
