@@ -48,7 +48,7 @@ class AuthServiceProvider extends BaseServiceProvider {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
 
         $this->publishes([
-            __DIR__ . '/../resources/lang' => base_path('resources/lang/vendor/oxygen/auth'),
+            __DIR__ . '/../resources/lang' => $this->app->langPath('vendor/oxygen/auth'),
         ]);
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'oxygen/auth');
 

@@ -60,21 +60,21 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     /**
      * {@inheritdoc}
      */
-    public function open($savePath, $sessionName) {
+    public function open($savePath, $sessionName): bool {
         return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function close() {
+    public function close(): bool {
         return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function read($sessionId) {
+    public function read($sessionId): string|false {
         $session = $this->getEntityManager()->find(DoctrineSession::class, $sessionId);
 
         if($session === null) {
@@ -91,7 +91,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     /**
      * {@inheritdoc}
      */
-    public function write($sessionId, $data) {
+    public function write($sessionId, $data): bool {
         $updateAuxiliaryInfo = function(DoctrineSession $session) {
             $session->setLastActivity(Carbon::now()->toDateTime());
             $this->addUserInformation($session)
@@ -189,7 +189,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     /**
      * {@inheritdoc}
      */
-    public function destroy($sessionId) {
+    public function destroy($sessionId): bool {
         $this->getQuery()->delete(DoctrineSession::class, 'u')
             ->where('u.id = :sessionId')
             ->setParameter('sessionId', $sessionId)
@@ -202,7 +202,7 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     /**
      * {@inheritdoc}
      */
-    public function gc($lifetime) {
+    public function gc($lifetime): int {
         $rows = $this->getQuery()
             ->delete(DoctrineSession::class, 'u')
             ->where('u.lastActivity <= :staleTime')
