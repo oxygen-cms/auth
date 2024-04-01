@@ -14,15 +14,15 @@
         }
     ],
     "require": {
-        "php": ">=7.4",
-        "oxygen/core": "dev-laravel10",
-        "oxygen/crud": "dev-laravel10",
-        "oxygen/data": "dev-laravel10",
-        "oxygen/preferences": "dev-laravel10",
+        "php": ">=8.1",
+        "oxygen/core": "~0.15.0",
+        "oxygen/crud": "~0.12.0",
+        "oxygen/data": "~0.12.0",
+        "oxygen/preferences": "~0.6.0",
         "illuminate/support": "^10.0",
         "laravel/sanctum": "^3.2",
         "guzzlehttp/guzzle": "^7.4.5",
-        "darkghosthunter/laraguard": "dev-laravel10",
+        "darkghosthunter/laraguard": "dev-master",
         "ext-json": "*",
         "ext-zip": "*",
         "lab404/laravel-impersonate": "^1.7",
@@ -58,7 +58,7 @@
     ],
     "require-dev": {
         "phpstan/phpstan": "^1.8",
-        "phpspec/phpspec": "^6.1",
+        "phpspec/phpspec": "^7.0",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan-webmozart-assert": "^1.2.1"
     },

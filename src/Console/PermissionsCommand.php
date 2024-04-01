@@ -198,7 +198,7 @@ class PermissionsCommand extends Command {
         $this->renderPermissionsTable($keys, $groupsGenerator, null, 'Key');
     }
 
-    private function renderPermissionsTable(array $keys, callable $groupsGenerator, ?array $previousPermissionValues = null, string $firstColumnName) {
+    private function renderPermissionsTable(array $keys, callable $groupsGenerator, ?array $previousPermissionValues, string $firstColumnName) {
         $permissionsRows = array_map(function(string $key) use($groupsGenerator, $previousPermissionValues) {
             $row = [$key];
             $groups = $groupsGenerator();
