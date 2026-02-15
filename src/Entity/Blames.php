@@ -7,12 +7,12 @@ use Illuminate\Contracts\Auth\Authenticatable;
 trait Blames {
 
     /**
-     * @ORM\ManyToOne(fetch="LAZY")
+     * @ORM\ManyToOne(fetch="EAGER")
      */
     private ?User $createdBy;
 
     /**
-     * @ORM\ManyToOne(fetch="LAZY")
+     * @ORM\ManyToOne(fetch="EAGER")
      */
     private ?User $updatedBy;
 
