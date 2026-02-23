@@ -32,8 +32,8 @@ use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Core\Permissions\PermissionsInterface;
 use Oxygen\Data\BaseServiceProvider;
-use Oxygen\Preferences\PreferencesManager;
-use Oxygen\Preferences\SchemaRegistered;
+use Oxygen\Core\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\SchemaRegistered;
 use Oxygen\Auth\Listeners\EnforceTwoFactorAuth;
 
 class AuthServiceProvider extends BaseServiceProvider {

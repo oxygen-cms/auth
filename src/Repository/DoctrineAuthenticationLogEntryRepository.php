@@ -8,7 +8,7 @@ use Oxygen\Auth\Entity\AuthenticationLogEntry;
 use Oxygen\Auth\Entity\User;
 use Oxygen\Data\Pagination\PaginationService;
 use Oxygen\Data\Repository\Doctrine\Repository;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferencesManager;
 
 class DoctrineAuthenticationLogEntryRepository extends Repository implements AuthenticationLogEntryRepositoryInterface {
 

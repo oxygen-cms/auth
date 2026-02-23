@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Routing\Router;
-use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
-use Oxygen\Preferences\Loader\DatabaseLoader;
+use Oxygen\Core\Facades\Preferences;
+use Oxygen\Core\Preferences\Loader\PreferenceRepositoryInterface;
+use Oxygen\Core\Preferences\Loader\DatabaseLoader;
 
 Preferences::register('modules.auth', function($schema) {
     $schema->setTitle('Authentication');

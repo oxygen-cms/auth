@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
+use Oxygen\Core\Preferences\Loader\PreferenceRepositoryInterface;
 
 class CreateAuthPreferences extends Migration {
 

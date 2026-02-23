@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Validation\Rule;
-use Oxygen\Preferences\Loader\PreferenceRepositoryInterface;
-use Oxygen\Preferences\Loader\DatabaseLoader;
+use Oxygen\Core\Facades\Preferences;
+use Oxygen\Core\Preferences\Loader\PreferenceRepositoryInterface;
+use Oxygen\Core\Preferences\Loader\DatabaseLoader;
 
 Preferences::register('appearance.auth', function($schema) {
     $schema->setTitle('Login & Logout');

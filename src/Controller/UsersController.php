@@ -13,18 +13,18 @@ use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Notifications\UserInvitedNotification;
 use Oxygen\Core\Controller\Controller;
 use Oxygen\Core\Http\Notification;
-use Oxygen\Crud\Controller\BasicCrudApi;
-use Oxygen\Crud\Controller\SoftDeleteCrudApi;
+use Oxygen\Core\Controller\BasicCrudTrait;
+use Oxygen\Core\Controller\SoftDeleteCrudTrait;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
 use Webmozart\Assert\Assert;
 
 class UsersController extends Controller {
 
-    use BasicCrudApi, SoftDeleteCrudApi {
-        SoftDeleteCrudApi::deleteDeleteApi insteadof BasicCrudApi;
+    use BasicCrudTrait, SoftDeleteCrudTrait {
+        SoftDeleteCrudTrait::deleteDeleteApi insteadof BasicCrudTrait;
         // we don't care about filtering by deleted status here
-        BasicCrudApi::getListQueryParameters insteadof SoftDeleteCrudApi;
+        BasicCrudTrait::getListQueryParameters insteadof SoftDeleteCrudTrait;
     }
 
     const PER_PAGE = 50;
@@ -43,7 +43,7 @@ class UsersController extends Controller {
      */
     public function __construct(UserRepositoryInterface $repository) {
         $this->repository = $repository;
-        BasicCrudApi::setupLangMappings(self::LANG_MAPPINGS);
+        BasicCrudTrait::setupLangMappings(self::LANG_MAPPINGS);
     }
 
     /**
@@ -110,7 +110,7 @@ class UsersController extends Controller {
         $this->repository->persist($user);
 
         return response()->json([
-            'content' => __('oxygen/crud::messages.basic.deleted'),
+            'content' => __('oxygen/core::messages.basic.deleted'),
             'status' => Notification::SUCCESS
         ]);
     }

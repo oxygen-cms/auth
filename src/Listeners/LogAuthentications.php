@@ -12,7 +12,7 @@ use Illuminate\Auth\Events\Login;
 use Oxygen\Auth\Entity\AuthenticationLogEntry;
 use Oxygen\Auth\Notifications\NewDeviceNotification;
 use Oxygen\Auth\Repository\AuthenticationLogEntryRepositoryInterface;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferencesManager;
 
 class LogAuthentications {
     /**
