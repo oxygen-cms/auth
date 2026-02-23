@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferencesManager;
 
 class CreateAuthModules extends Migration {
 

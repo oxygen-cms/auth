@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Illuminate\Translation\Translator;
 use Oxygen\Core\Http\Notification;
-use Oxygen\Preferences\PreferenceNotFoundException;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferenceNotFoundException;
+use Oxygen\Core\Preferences\PreferencesManager;
 
 class RedirectIfAuthenticated {
 

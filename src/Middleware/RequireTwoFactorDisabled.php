@@ -14,7 +14,7 @@ use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferencesManager;
 
 class RequireTwoFactorDisabled {
     /**

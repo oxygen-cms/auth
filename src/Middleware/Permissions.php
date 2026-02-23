@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Oxygen\Core\Translation\Translator;
-use Oxygen\Preferences\PreferenceNotFoundException;
-use Oxygen\Preferences\PreferencesManager;
+use Oxygen\Core\Preferences\PreferenceNotFoundException;
+use Oxygen\Core\Preferences\PreferencesManager;
 use Oxygen\Auth\Permissions\Permissions as PermissionsService;
 
 class Permissions {

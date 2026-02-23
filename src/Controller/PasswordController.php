@@ -3,18 +3,10 @@
 namespace Oxygen\Auth\Controller;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Illuminate\View\View;
-use Oxygen\Core\Blueprint\BlueprintNotFoundException;
 use Illuminate\Contracts\Auth\PasswordBroker;
-use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Http\Request;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
-use Oxygen\Core\Http\Notification;
-use Oxygen\Core\Blueprint\BlueprintManager;
-use Oxygen\Core\Controller\BlueprintController;
-use ReflectionException;
 
 class PasswordController extends Controller {
     /**
@@ -36,20 +28,22 @@ class PasswordController extends Controller {
      *
      * @param PasswordBroker $password
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function postRemind(PasswordBroker $password, Request $request) {
+    public function postRemind(PasswordBroker $password, Request $request): JsonResponse {
         $result = $password->sendResetLink($request->only('email'));
 
         switch ($result) {
             case PasswordBroker::RESET_LINK_SENT:
-                return notify(
-                    new Notification(__($result), Notification::SUCCESS)
-                );
+                return response()->json([
+                    'content' => __($result),
+                    'status' => 'success'
+                ]);
             default:
-                return notify(
-                    new Notification(__($result), Notification::FAILED)
-                );
+                return response()->json([
+                    'content' => __($result),
+                    'status' => 'failed'
+                ], 422);
         }
     }
 

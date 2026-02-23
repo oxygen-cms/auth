@@ -7,9 +7,9 @@ use Illuminate\Support\Arr;
 use Oxygen\Auth\Entity\User;
 use Oxygen\Auth\Repository\UserRepositoryInterface;
 use Oxygen\Data\Exception\InvalidEntityException;
-use Oxygen\Preferences\ChainedStore;
-use Oxygen\Preferences\Loader\LoaderInterface;
-use Oxygen\Preferences\PreferencesSettingInterface;
+use Oxygen\Core\Preferences\ChainedStore;
+use Oxygen\Core\Preferences\Loader\LoaderInterface;
+use Oxygen\Core\Preferences\PreferencesSettingInterface;
 use Webmozart\Assert\Assert;
 
 class UserLoader implements LoaderInterface, PreferencesSettingInterface {

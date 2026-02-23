@@ -4,17 +4,16 @@ namespace Oxygen\Auth\Controller;
 
 use Illuminate\Routing\Controller;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
-use OxygenModule\Auth\Fields\GroupFieldSet;
-use Oxygen\Crud\Controller\BasicCrudApi;
-use Oxygen\Crud\Controller\SoftDeleteCrudApi;
+use Oxygen\Core\Controller\BasicCrudTrait;
+use Oxygen\Core\Controller\SoftDeleteCrudTrait;
 use Webmozart\Assert\Assert;
 
 class GroupsController extends Controller {
 
-    use BasicCrudApi, SoftDeleteCrudApi {
-        SoftDeleteCrudApi::deleteDeleteApi insteadof BasicCrudApi;
+    use BasicCrudTrait, SoftDeleteCrudTrait {
+        SoftDeleteCrudTrait::deleteDeleteApi insteadof BasicCrudTrait;
         // we don't care about filtering by deleted status here
-        BasicCrudApi::getListQueryParameters insteadof SoftDeleteCrudApi;
+        BasicCrudTrait::getListQueryParameters insteadof SoftDeleteCrudTrait;
     }
 
     const PER_PAGE = 50;
@@ -34,7 +33,7 @@ class GroupsController extends Controller {
     public function __construct(GroupRepositoryInterface $repository) {
         $this->repository = $repository;
         Assert::isInstanceOf($this->repository, GroupRepositoryInterface::class);
-        BasicCrudApi::setupLangMappings(self::LANG_MAPPINGS);
+        BasicCrudTrait::setupLangMappings(self::LANG_MAPPINGS);
     }
 
 }
