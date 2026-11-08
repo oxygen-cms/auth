@@ -2,8 +2,8 @@
 
 namespace Oxygen\Auth\Entity;
 
-use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
-use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
+use Oxygen\Auth\TwoFactor\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Auth\TwoFactor\HasTwoFactorAuthentication;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
@@ -51,7 +51,7 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     use Accessors, Fillable;
     use Notifiable;
 
-    use DoctrineTwoFactorAuthentication;
+    use HasTwoFactorAuthentication;
 
     /**
      * @ORM\Column(type="string", unique=true)

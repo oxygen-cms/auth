@@ -73,7 +73,11 @@ return [
 
     'twoFactor' => [
         'success' => 'Code accepted',
-        'failure' => 'Sorry, but that\'s not a valid code. Try again'
+        'failure' => 'Sorry, but that\'s not a valid code. Try again',
+        'invalidCode' => 'The code is invalid or has expired.',
+        'enable' => 'You need to enable two factor authentication.',
+        'alreadyEnabled' => 'You have already enabled two factor authentication for your account',
+        'required' => 'Two factor authentication is required.',
     ],
 
     'fullNameChanged' => 'Full Name updated',

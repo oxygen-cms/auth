@@ -1,7 +1,7 @@
 <?php
 
 /**
- * From the DarkGhostHunter\Laraguard package...
+ * Adapted from the darkghosthunter/laraguard package (MIT).
  */
 
 namespace Oxygen\Auth\Middleware;
@@ -12,7 +12,7 @@ use Oxygen\Core\Contracts\Routing\ResponseFactory;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\Auth\Authenticatable;
-use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Auth\TwoFactor\Contracts\TwoFactorAuthenticatable;
 
 class ConfirmTwoFactorCode {
     /**
@@ -63,7 +63,7 @@ class ConfirmTwoFactorCode {
         }
 
         return $this->response->notification(
-            new Notification(trans('laraguard::messages.required'), Notification::INFO),
+            new Notification(trans('oxygen/auth::messages.twoFactor.required'), Notification::INFO),
             ['redirect' => $this->url->route($redirectToRoute)]
         );
     }
@@ -86,6 +86,6 @@ class ConfirmTwoFactorCode {
     protected function codeWasValidated($request) {
         $confirmedAt = now()->timestamp - $request->session()->get('2fa.totp_confirmed_at', 0);
 
-        return $confirmedAt < config('laraguard.confirm.timeout', 10800);
+        return $confirmedAt < config('two-factor.confirm.timeout', 10800);
     }
 }

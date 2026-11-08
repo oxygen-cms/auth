@@ -2,7 +2,7 @@
 
 namespace Oxygen\Auth\Listeners;
 
-use DarkGhostHunter\Laraguard\Rules\TotpCodeRule;
+use Oxygen\Auth\TwoFactor\Rules\TotpCodeRule;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Oxygen\Auth\Entity\User;
@@ -17,7 +17,7 @@ class EnforceTwoFactorAuth {
         }
 
         $request = app('request');
-        $code = $request->input(config('laraguard.input'));
+        $code = $request->input(config('two-factor.input'));
         $validator = validator([
             'code' => $code
         ], [
