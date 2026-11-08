@@ -73,7 +73,12 @@ trait HandlesCodes {
         // rather than number of periods, so translate here to preserve the periods-based API.
         $windowSeconds = $window > 0 ? $this->seconds - 1 : 0;
 
-        return $this->makeOTP()->verify($code, null, $windowSeconds);
+        if(!$this->makeOTP()->verify($code, null, $windowSeconds)) {
+            return false;
+        }
+
+        // Atomically mark the code as used; if a concurrent request already did, reject this one.
+        return $this->setCodeHasUsed($code);
     }
 
     /**
@@ -149,16 +154,16 @@ trait HandlesCodes {
      * Sets the Code has used so it can't be used again.
      *
      * @param  string  $code
-     * @param  int|string|\Datetime|\Illuminate\Support\Carbon  $at
-     * @return bool
+     * @return bool true if this call marked the code; false if it was already marked
      */
-    protected function setCodeHasUsed(string $code, $at) {
+    protected function setCodeHasUsed(string $code) {
         if (!$this->initialized) {
             $this->initializeHandlesCodes();
         }
-        // We will safely set the cache key for the whole lifetime plus window just to be safe.
-        return $this->cache->set($this->cacheKey($code), true,
-            Carbon::createFromTimestamp($this->getTimestampFromPeriod($at, $this->window + 1))
-        );
+        // Keep the marker for the code's whole validity (window periods either side, plus the current one).
+        $ttl = ($this->window + 2) * $this->seconds;
+
+        // add() only stores if the key is absent, making check-and-set atomic.
+        return $this->cache->add($this->cacheKey($code), true, $ttl);
     }
 }
