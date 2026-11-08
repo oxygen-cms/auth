@@ -43,7 +43,7 @@ class UsersController extends Controller {
      */
     public function __construct(UserRepositoryInterface $repository) {
         $this->repository = $repository;
-        BasicCrudTrait::setupLangMappings(self::LANG_MAPPINGS);
+        self::setupLangMappings(self::LANG_MAPPINGS);
     }
 
     /**
