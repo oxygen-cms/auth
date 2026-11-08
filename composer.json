@@ -46,6 +46,16 @@
     },
     "allow-plugins": {
       "phpstan/extension-installer": true
+    },
+    "policy": {
+      "advisories": {
+        "ignore": {
+          "laravel/framework": {
+            "constraint": "^10.0",
+            "reason": "deferring Laravel 11 upgrade"
+          }
+        }
+      }
     }
   },
   "repositories": [
