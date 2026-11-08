@@ -30,54 +30,40 @@ use Oxygen\Data\Behaviour\Searchable;
  * @method Collection getUsers()
  * @method Collection getChildren()
   *
- * @ORM\Entity
- * @ORM\Table(name="`groups`")
- * @ORM\HasLifecycleCallbacks
  */
+#[ORM\Entity]
+#[ORM\Table(name: '`groups`')]
+#[ORM\HasLifecycleCallbacks]
 class Group implements Validatable, PrimaryKeyInterface, Searchable, PermissionsSource, Arrayable {
 
     use PrimaryKey, Accessors, Timestamps, SoftDeletes, Fillable, Preferences;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     protected $name;
 
     /**
      * TODO: add `unique=true` at a later stage
-     * @ORM\Column(type="string")
      */
+    #[ORM\Column(type: 'string')]
     protected $nickname;
 
-    /**
-     * @ORM\Column(type="string", length=30)
-     */
+    #[ORM\Column(type: 'string', length: 30)]
     protected $icon;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     protected $description;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\User", mappedBy="group")
-     */
+    #[ORM\OneToMany(targetEntity: 'Oxygen\Auth\Entity\User', mappedBy: 'group')]
     protected $users;
 
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
+    #[ORM\Column(type: 'json', nullable: true)]
     protected $permissions;
 
-    /**
-     * @ORM\ManyToOne(inversedBy="children", fetch="LAZY", cascade={"persist"})
-     * @ORM\JoinColumn(name="parent_id", nullable=true)
-     */
+    #[ORM\ManyToOne(inversedBy: 'children', fetch: 'LAZY', cascade: ['persist'])]
+    #[ORM\JoinColumn(name: 'parent_id', nullable: true)]
     protected ?Group $parent;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\Group", mappedBy="parent")
-     */
+    #[ORM\OneToMany(targetEntity: 'Oxygen\Auth\Entity\Group', mappedBy: 'parent')]
     protected $children;
 
     /**

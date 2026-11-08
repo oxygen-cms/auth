@@ -19,9 +19,9 @@ use Oxygen\Data\Behaviour\PrimaryKey;
  * @method string getIpAddress()
  * @method string getUserAgent()
  *
- * @ORM\Entity
- * @ORM\Table(name="auth_log")
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'auth_log')]
 class AuthenticationLogEntry {
 
     use PrimaryKey, Accessors;
@@ -47,35 +47,23 @@ class AuthenticationLogEntry {
      */
     const LOGOUT = 2;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Oxygen\Auth\Entity\User", inversedBy="authenticationLogEntries")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne(targetEntity: 'Oxygen\Auth\Entity\User', inversedBy: 'authenticationLogEntries')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     protected $user;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     protected $username;
 
-    /**
-     * @ORM\Column(type="text")
-     */
+    #[ORM\Column(type: 'text')]
     protected $userAgent;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     protected $ipAddress;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     protected $timestamp;
 
-    /**
-     * @ORM\Column(type="smallint")
-     */
+    #[ORM\Column(type: 'smallint')]
     protected $type;
 
     /**

@@ -17,9 +17,9 @@ use Oxygen\Auth\TwoFactor\Events\TwoFactorEnabled;
 trait HasTwoFactorAuthentication {
 
     /**
-     * @ORM\OneToOne(targetEntity="Oxygen\Auth\Entity\TwoFactorAuthentication", mappedBy="authenticatable")
      * @var TwoFactorAuthentication|null
      */
+    #[ORM\OneToOne(targetEntity: 'Oxygen\Auth\Entity\TwoFactorAuthentication', mappedBy: 'authenticatable')]
     protected $twoFactorAuth;
 
     /**

@@ -2,11 +2,10 @@
 
 namespace Oxygen\Auth\Preferences;
 
+use Doctrine\ORM\Mapping as ORM;
 trait Preferences {
 
-    /**
-     * @ORM\Column(type="json")
-     */
+    #[ORM\Column(type: 'json')]
     protected $preferences = [];
 
     /**

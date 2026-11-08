@@ -10,74 +10,58 @@ use Oxygen\Data\Behaviour\Timestamps;
 use ParagonIE\ConstantTime\Base32;
 use Oxygen\Auth\TwoFactor\Contracts\TwoFactorTotp;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="`two_factor_auth`")
- * @ORM\HasLifecycleCallbacks
- */
+#[ORM\Entity]
+#[ORM\Table(name: '`two_factor_auth`')]
+#[ORM\HasLifecycleCallbacks]
 class TwoFactorAuthentication implements TwoFactorTotp {
     use HandlesCodes;
     use SerializesSharedSecret;
 
     use PrimaryKey, Timestamps;
 
-    /**
-     * @ORM\OneToOne(targetEntity="Oxygen\Auth\Entity\User", inversedBy="twoFactorAuth", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="authenticatable_id", referencedColumnName="id", onDelete="CASCADE")
-     */
+    #[ORM\OneToOne(targetEntity: 'Oxygen\Auth\Entity\User', inversedBy: 'twoFactorAuth', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'authenticatable_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     protected $authenticatable;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     protected $shared_secret;
 
     /**
-     * @ORM\Column(name="enabled_at", type="datetime", nullable=true)
      * @var \DateTime
      */
+    #[ORM\Column(name: 'enabled_at', type: 'datetime', nullable: true)]
     private $enabled_at;
 
     /**
-     * @ORM\Column(type="string")
      * @var \DateTime
      */
+    #[ORM\Column(type: 'string')]
     private $label;
 
-    /**
-     * @ORM\Column(type="smallint")
-     */
+    #[ORM\Column(type: 'smallint')]
     private $digits;
-    /**
-     * @ORM\Column(type="smallint")
-     */
+    #[ORM\Column(type: 'smallint')]
     private $seconds;
-    /**
-     * @ORM\Column(type="smallint", name="`window`")
-     */
+    #[ORM\Column(type: 'smallint', name: '`window`')]
     private $window;
 
-    /**
-     * @ORM\Column(type="string", name="`algorithm`")
-     */
+    #[ORM\Column(type: 'string', name: '`algorithm`')]
     private $algorithm;
 
     /**
      * Legacy column: recovery codes are no longer supported, but the column is kept so the schema is unchanged.
      *
-     * @ORM\Column(type="json", nullable=true)
      */
+    #[ORM\Column(type: 'json', nullable: true)]
     protected $recovery_codes;
 
     /**
-     * @ORM\Column(name="recovery_codes_generated_at", type="datetime", nullable=true)
      * @var \DateTime
      */
+    #[ORM\Column(name: 'recovery_codes_generated_at', type: 'datetime', nullable: true)]
     private $recovery_codes_generated_at;
 
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
+    #[ORM\Column(type: 'json', nullable: true)]
     private $safe_devices;
 
     /**
