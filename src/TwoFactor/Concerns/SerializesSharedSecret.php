@@ -20,7 +20,7 @@ trait SerializesSharedSecret {
             'secret'    => $this->getSharedSecret(),
             'algorithm' => strtoupper($this->algorithm),
             'digits'     => $this->digits,
-        ], null, '&', PHP_QUERY_RFC3986);
+        ], '', '&', PHP_QUERY_RFC3986);
 
         return 'otpauth://totp/' . rawurlencode($issuer) . '%3A' . $this->label . "?$query";
     }

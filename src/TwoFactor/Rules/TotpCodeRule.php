@@ -19,7 +19,7 @@ class TotpCodeRule implements Rule {
      *
      * @param Authenticatable|null  $user
      */
-    public function __construct(Authenticatable $user = null) {
+    public function __construct(?Authenticatable $user = null) {
         $this->user = $user;
     }
 

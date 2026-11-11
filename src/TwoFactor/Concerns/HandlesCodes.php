@@ -2,10 +2,7 @@
 
 namespace Oxygen\Auth\TwoFactor\Concerns;
 
-use DateTime;
-use Illuminate\Support\Carbon;
 use OTPHP\TOTP;
-use ParagonIE\ConstantTime\Base32;
 
 trait HandlesCodes {
     /**
@@ -48,7 +45,7 @@ trait HandlesCodes {
      * @return \Illuminate\Contracts\Cache\Repository
      * @throws \Exception
      */
-    protected function useCacheStore(string $store = null) {
+    protected function useCacheStore(?string $store = null) {
         return cache()->store($store);
     }
 
@@ -59,7 +56,7 @@ trait HandlesCodes {
      * @param  int  $window
      * @return bool
      */
-    public function validateCode(string $code, int $window = null) : bool {
+    public function validateCode(string $code, ?int $window = null) : bool {
         if(!$this->initialized) {
             $this->initializeHandlesCodes();
         }
@@ -104,24 +101,6 @@ trait HandlesCodes {
 
         $otp = TOTP::create($this->getSharedSecret(), $this->seconds, $this->algorithm, $this->digits);
         return $otp;
-    }
-
-    /**
-     * Normalizes the Timestamp from a string, integer or object.
-     *
-     * @param  int|string|\Datetime|\Illuminate\Support\Carbon  $at
-     * @return int
-     */
-    protected function parseTimestamp($at) : int {
-        if ($at instanceof DateTime) {
-            return $at->getTimestamp();
-        }
-
-        if (is_string($at)) {
-            return Carbon::parse($at)->getTimestamp();
-        }
-
-        return $at;
     }
 
     /**

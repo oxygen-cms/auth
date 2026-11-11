@@ -13,7 +13,7 @@ interface TwoFactorTotp extends Renderable
      * @param  int  $window
      * @return bool
      */
-    public function validateCode(string $code, int $window = null) : bool;
+    public function validateCode(string $code, ?int $window = null) : bool;
 
     /**
      * Creates a Code for the current timestamp.

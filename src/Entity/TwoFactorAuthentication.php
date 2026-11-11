@@ -27,13 +27,13 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     protected $shared_secret;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     #[ORM\Column(name: 'enabled_at', type: 'datetime', nullable: true)]
     private $enabled_at;
 
     /**
-     * @var \DateTime
+     * @var string
      */
     #[ORM\Column(type: 'string')]
     private $label;
@@ -48,21 +48,22 @@ class TwoFactorAuthentication implements TwoFactorTotp {
     #[ORM\Column(type: 'string', name: '`algorithm`')]
     private $algorithm;
 
-    /**
-     * Legacy column: recovery codes are no longer supported, but the column is kept so the schema is unchanged.
-     *
+    /*
+     * Legacy columns: recovery codes and safe devices are no longer supported, but the columns are kept
+     * (and cleared by flushAuth()) so the schema is unchanged.
      */
+
     #[ORM\Column(type: 'json', nullable: true)]
     protected $recovery_codes;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     #[ORM\Column(name: 'recovery_codes_generated_at', type: 'datetime', nullable: true)]
-    private $recovery_codes_generated_at;
+    private $recovery_codes_generated_at; // @phpstan-ignore property.onlyWritten
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private $safe_devices;
+    private $safe_devices; // @phpstan-ignore property.onlyWritten
 
     /**
      * TwoFactorAuthentication constructor.
@@ -87,8 +88,8 @@ class TwoFactorAuthentication implements TwoFactorTotp {
         $this->label = $string;
     }
 
-    public function setEnabledAt(\Illuminate\Support\Carbon $now) {
-        $this->enabled_at = $now->toDateTime();
+    public function setEnabledAt(\DateTimeInterface $now) {
+        $this->enabled_at = \DateTime::createFromInterface($now);
     }
 
     /**
@@ -164,6 +165,6 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      * @return string
      */
     public static function generateRandomSecret() {
-        return trim(Base32::encodeUpper(random_bytes(config('two-factor.secret_length')), '='));
+        return Base32::encodeUpperUnpadded(random_bytes(config('two-factor.secret_length')));
     }
 }

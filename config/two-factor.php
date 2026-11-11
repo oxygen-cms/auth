@@ -50,7 +50,7 @@ return [
     | SVG QR code size and margin.
     */
     'qr_code' => [
-        'size'   => 200,
+        'size'   => 400,
         'margin' => 4,
     ],
 ];
