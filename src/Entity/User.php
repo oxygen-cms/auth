@@ -2,8 +2,8 @@
 
 namespace Oxygen\Auth\Entity;
 
-use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
-use DarkGhostHunter\Laraguard\DoctrineTwoFactorAuthentication;
+use Oxygen\Auth\TwoFactor\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Auth\TwoFactor\HasTwoFactorAuthentication;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
@@ -40,10 +40,10 @@ use Illuminate\Auth\Notifications\VerifyEmail;
  * @method Collection getAuthenticationLogEntries()
  * @method void setFullName(string $fullName)
  *
- * @ORM\Entity
- * @ORM\Table(name="users")
- * @ORM\HasLifecycleCallbacks
  */
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+#[ORM\HasLifecycleCallbacks]
 class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, CanResetPassword, Searchable, TwoFactorAuthenticatable, MustVerifyEmail, UrlRoutable, OwnedByUser {
 
     use PrimaryKey, Timestamps, SoftDeletes, Authentication, Preferences;
@@ -51,32 +51,24 @@ class User implements PrimaryKeyInterface, Validatable, LaravelAuthenticable, Ca
     use Accessors, Fillable;
     use Notifiable;
 
-    use DoctrineTwoFactorAuthentication;
+    use HasTwoFactorAuthentication;
 
-    /**
-     * @ORM\Column(type="string", unique=true)
-     */
+    #[ORM\Column(type: 'string', unique: true)]
     protected $username;
 
-    /**
-     * @ORM\Column(name="full_name", type="string")
-     */
+    #[ORM\Column(name: 'full_name', type: 'string')]
     protected $fullName;
 
-    /**
-     * @ORM\ManyToOne(inversedBy="users", fetch="EAGER", cascade={"persist"})
-     */
+    #[ORM\ManyToOne(inversedBy: 'users', fetch: 'EAGER', cascade: ['persist'])]
     protected Group $group;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Oxygen\Auth\Entity\AuthenticationLogEntry", mappedBy="user", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity: 'Oxygen\Auth\Entity\AuthenticationLogEntry', mappedBy: 'user', cascade: ['persist', 'remove'])]
     protected $authenticationLogEntries;
 
     /**
-     * @ORM\Column(name="email_verified_at", type="datetime", nullable=true)
      * @var DateTimeInterface|null
      */
+    #[ORM\Column(name: 'email_verified_at', type: 'datetime', nullable: true)]
     protected $verifiedAt;
 
     /**

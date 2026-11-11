@@ -1,7 +1,7 @@
 <?php
 
 /**
- * From the DarkGhostHunter\Laraguard package...
+ * Adapted from the darkghosthunter/laraguard package (MIT).
  */
 
 namespace Oxygen\Auth\Middleware;
@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Oxygen\Core\Http\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Oxygen\Core\Contracts\Routing\ResponseFactory;
-use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Auth\TwoFactor\Contracts\TwoFactorAuthenticatable;
 use Oxygen\Core\Preferences\PreferencesManager;
 
 class RequireTwoFactorDisabled {
@@ -57,7 +57,7 @@ class RequireTwoFactorDisabled {
             }
 
             return $this->response->notification(
-                new Notification(trans('laraguard::messages.already_enabled'), Notification::FAILED),
+                new Notification(trans('oxygen/auth::messages.twoFactor.alreadyEnabled'), Notification::FAILED),
                 ['redirect' => $redirectToRoute]
             );
         }

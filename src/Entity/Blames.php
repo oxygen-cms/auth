@@ -2,18 +2,15 @@
 
 namespace Oxygen\Auth\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 trait Blames {
 
-    /**
-     * @ORM\ManyToOne(fetch="EAGER")
-     */
+    #[ORM\ManyToOne(fetch: 'EAGER')]
     private ?User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(fetch="EAGER")
-     */
+    #[ORM\ManyToOne(fetch: 'EAGER')]
     private ?User $updatedBy;
 
     /**

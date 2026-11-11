@@ -1,0 +1,148 @@
+<?php
+
+namespace Oxygen\Auth\TwoFactor\Concerns;
+
+use OTPHP\TOTP;
+
+trait HandlesCodes {
+    /**
+     * Current instance of the Cache Repository.
+     *
+     * @var \Illuminate\Contracts\Cache\Repository
+     */
+    protected $cache;
+
+    /**
+     * String to prefix the Cache key.
+     *
+     * @var string
+     */
+    protected $prefix;
+
+    /**
+     * Whether the trait has been initialised yet
+     * @var bool
+     */
+    protected $initialized = false;
+
+    /**
+     * Initializes the current trait.
+     *
+     * @throws \Exception
+     */
+    protected function initializeHandlesCodes() {
+        ['store' => $store, 'prefix' => $this->prefix] = config('two-factor.cache');
+
+        $this->cache = $this->useCacheStore($store);
+
+        $this->initialized = true;
+    }
+
+    /**
+     * Returns the Cache Store to use.
+     *
+     * @param  string  $store
+     * @return \Illuminate\Contracts\Cache\Repository
+     * @throws \Exception
+     */
+    protected function useCacheStore(?string $store = null) {
+        return cache()->store($store);
+    }
+
+    /**
+     * Validates a given code, optionally for a given timestamp and future window.
+     *
+     * @param  string  $code
+     * @param  int  $window
+     * @return bool
+     */
+    public function validateCode(string $code, ?int $window = null) : bool {
+        if(!$this->initialized) {
+            $this->initializeHandlesCodes();
+        }
+        if($this->codeHasBeenUsed($code)) {
+            return false;
+        }
+
+        $window = $window ?? $this->window;
+
+        // otphp v11 interprets the third arg as seconds of clock drift (must be < period)
+        // rather than number of periods, so translate here to preserve the periods-based API.
+        $windowSeconds = $window > 0 ? $this->seconds - 1 : 0;
+
+        if(!$this->makeOTP()->verify($code, null, $windowSeconds)) {
+            return false;
+        }
+
+        // Atomically mark the code as used; if a concurrent request already did, reject this one.
+        return $this->setCodeHasUsed($code);
+    }
+
+    /**
+     * Returns a two-factor code for the current timestamp.
+     * @return string
+     */
+    public function makeTwoFactorCode(): string {
+        $code = $this->makeOTP()->now();
+        // quick sanity check that this is verifiable
+        assert($this->makeOTP()->verify($code));
+        return $code;
+    }
+
+    /**
+     * Creates a Code for a given timestamp, optionally by a given period offset.
+     *
+     * @return TOTP
+     */
+    public function makeOTP() {
+        if (!$this->initialized) {
+            $this->initializeHandlesCodes();
+        }
+
+        $otp = TOTP::create($this->getSharedSecret(), $this->seconds, $this->algorithm, $this->digits);
+        return $otp;
+    }
+
+    /**
+     * Returns the cache key string to save the codes into the cache.
+     *
+     * @param  string  $code
+     * @return string
+     */
+    protected function cacheKey(string $code) {
+        if (!$this->initialized) {
+            $this->initializeHandlesCodes();
+        }
+        return "{$this->prefix}|{$this->getId()}|$code";
+    }
+
+    /**
+     * Checks if the code has been used.
+     *
+     * @param  string  $code
+     * @return bool
+     */
+    protected function codeHasBeenUsed(string $code) {
+        if (!$this->initialized) {
+            $this->initializeHandlesCodes();
+        }
+        return $this->cache->has($this->cacheKey($code));
+    }
+
+    /**
+     * Sets the Code has used so it can't be used again.
+     *
+     * @param  string  $code
+     * @return bool true if this call marked the code; false if it was already marked
+     */
+    protected function setCodeHasUsed(string $code) {
+        if (!$this->initialized) {
+            $this->initializeHandlesCodes();
+        }
+        // Keep the marker for the code's whole validity (window periods either side, plus the current one).
+        $ttl = ($this->window + 2) * $this->seconds;
+
+        // add() only stores if the key is absent, making check-and-set atomic.
+        return $this->cache->add($this->cacheKey($code), true, $ttl);
+    }
+}

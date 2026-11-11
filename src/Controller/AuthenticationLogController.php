@@ -31,7 +31,7 @@ class AuthenticationLogController extends Controller {
      * @return JsonResponse
      */
     public function getAuthenticationLogEntries(AuthenticationLogEntryRepositoryInterface $entries) {
-        $user = auth()->user();
+        $user = auth()->guard()->user();
         Assert::isInstanceOf($user, User::class);
         $paginator = $entries->findByUser($user, self::AUTHENTICATION_LOG_PER_PAGE);
 
@@ -95,7 +95,7 @@ class AuthenticationLogController extends Controller {
      * @param EntityManager $entityManager
      * @param Request $request
      * @return JsonResponse
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\Exception\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      */

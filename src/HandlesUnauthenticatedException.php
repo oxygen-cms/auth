@@ -23,7 +23,7 @@ trait HandlesUnauthenticatedException {
 
         return $request->expectsJson()
             ? response()->json(['message' => $exception->getMessage(), 'code' => 'unauthenticated'], 401)
-            : redirect()->guest($exception->redirectTo() ?? (route('login') . '?location=' . urlencode($targetURL)));
+            : redirect()->guest($exception->redirectTo($request) ?? (route('login') . '?location=' . urlencode($targetURL)));
     }
 
 }

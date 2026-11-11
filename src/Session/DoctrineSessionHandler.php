@@ -14,6 +14,7 @@ use Oxygen\Auth\Entity\DoctrineSession;
 use DateTime;
 use Oxygen\Auth\Entity\User;
 use SessionHandlerInterface;
+use Webmozart\Assert\Assert;
 
 class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerInterface {
 
@@ -136,6 +137,8 @@ class DoctrineSessionHandler implements ExistenceAwareInterface, SessionHandlerI
     protected function addUserInformation(DoctrineSession $session) {
         if($this->container && $this->container->bound(Guard::class)) {
             $user = $this->container->make(Guard::class)->user();
+            // sessions can only be linked to Oxygen users; anything else means the guard is misconfigured
+            Assert::nullOrIsInstanceOf($user, User::class);
             if($user !== null && !$this->getEntityManager()->contains($user)) {
                 // if we are trying to update the user model and it fails, then the EntityManager will get closed
                 // then the `user` instance is managed by the old entity manager, which will cause issues when

@@ -6,7 +6,7 @@ For more information visit the [Core](https://github.com/oxygen-cms/core) reposi
 
 ## Two-Factor Authentication
 
-Through a [Doctrine port of the laraguard](https://github.com/oxygen-cms/laraguard-doctrine) package.
+Implemented in `src/TwoFactor` (TOTP). Originally derived from the [laraguard](https://github.com/darkghosthunter/laraguard) package (MIT), which was previously maintained as a Doctrine fork and is now folded into this package. Configuration lives under the `two-factor` config key.
 
 Uses an authenticator app instead of SMS.
 

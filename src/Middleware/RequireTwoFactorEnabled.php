@@ -1,7 +1,7 @@
 <?php
 
 /**
- * From the DarkGhostHunter\Laraguard package...
+ * Adapted from the darkghosthunter/laraguard package (MIT).
  */
 
 namespace Oxygen\Auth\Middleware;
@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Oxygen\Core\Http\Notification;
-use DarkGhostHunter\Laraguard\Contracts\TwoFactorAuthenticatable;
+use Oxygen\Auth\TwoFactor\Contracts\TwoFactorAuthenticatable;
 
 class RequireTwoFactorEnabled {
     /**
@@ -52,7 +52,7 @@ class RequireTwoFactorEnabled {
     public function handle($request, Closure $next, $redirectToRoute = '2fa.notice') {
         if(!$this->user->hasTwoFactorEnabled()) {
             return $this->response->json([
-                'content' => trans('laraguard::messages.enable'),
+                'content' => trans('oxygen/auth::messages.twoFactor.enable'),
                 'code' => 'two_factor_setup_required',
                 'status' => Notification::INFO
             ], 403);

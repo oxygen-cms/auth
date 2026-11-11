@@ -45,7 +45,12 @@ class AuthServiceProvider extends BaseServiceProvider {
 	 */
 	public function boot(Router $router, Dispatcher $dispatcher) {
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'oxygen.auth');
+        $this->mergeConfigFrom(__DIR__ . '/../config/two-factor.php', 'two-factor');
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'oxygen/auth');
+
+        $this->publishes([
+            __DIR__ . '/../config/two-factor.php' => config_path('two-factor.php'),
+        ], 'two-factor-config');
 
         $this->publishes([
             __DIR__ . '/../resources/lang' => $this->app->langPath('vendor/oxygen/auth'),

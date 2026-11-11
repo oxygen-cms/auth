@@ -6,42 +6,28 @@ use Doctrine\ORM\Mapping AS ORM;
 use Carbon\Carbon;
 use DateTime;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="sessions")
- */
+#[ORM\Entity]
+#[ORM\Table(name: 'sessions')]
 class DoctrineSession {
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string')]
     private ?string $id;
 
-    /**
-     * @ORM\ManyToOne
-     * @ORM\JoinColumn(name="user_id", onDelete="CASCADE")
-     */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'user_id', onDelete: 'CASCADE')]
     protected ?User $user;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
+    #[ORM\Column(type: 'string', nullable: true)]
     protected $ipAddress;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
+    #[ORM\Column(type: 'text', nullable: true)]
     protected $userAgent;
 
-    /**
-     * @ORM\Column(type="text", nullable=false)
-     */
+    #[ORM\Column(type: 'text', nullable: false)]
     protected $payload;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=false)
-     */
+    #[ORM\Column(type: 'datetime', nullable: false)]
     protected DateTime $lastActivity;
 
     /**

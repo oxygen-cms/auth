@@ -12,9 +12,9 @@ class PermissionsExplanation {
     private ?PermissionsSource $source = null;
     private ?string $contentType = null;
     private ?string $action = null;
-    private ?PermissionsSource $originalSource;
-    private ?string $originalContentType;
-    private ?string $originalAction;
+    private ?PermissionsSource $originalSource = null;
+    private ?string $originalContentType = null;
+    private ?string $originalAction = null;
 
     /**
      * @param bool|string $value
