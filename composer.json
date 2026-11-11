@@ -58,6 +58,6 @@
     "phpstan/phpstan-webmozart-assert": "^1.2.1"
   },
   "scripts": {
-    "test": "vendor/bin/phpspec run && vendor/bin/phpstan analyze src --level 5 --memory-limit 256M"
+    "test": "vendor/bin/phpspec run && vendor/bin/phpstan analyse --memory-limit 256M"
   }
 }
