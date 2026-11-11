@@ -1,0 +1,7 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    ignoreErrors:
+        # Blames and HandlesUnauthenticatedException are used by other packages (mod-pages, people, the app), not by auth itself
+        - identifier: trait.unused

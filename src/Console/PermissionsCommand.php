@@ -84,7 +84,7 @@ class PermissionsCommand extends Command {
 
         $previousPermissionValues = [];
 
-        if(!empty($keys) !== null) {
+        if(!empty($keys)) {
             foreach($keys as $key) {
                 $recognised = $this->isPermissionRecognised($key);
                 if(!$recognised['recognised'] && $this->option('unset') === null &&

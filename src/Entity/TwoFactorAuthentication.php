@@ -60,7 +60,7 @@ class TwoFactorAuthentication implements TwoFactorTotp {
      * @var \DateTime|null
      */
     #[ORM\Column(name: 'recovery_codes_generated_at', type: 'datetime', nullable: true)]
-    private $recovery_codes_generated_at; // @phpstan-ignore property.onlyWritten
+    private $recovery_codes_generated_at; // @phpstan-ignore property.onlyWritten, property.unusedType
 
     #[ORM\Column(type: 'json', nullable: true)]
     private $safe_devices; // @phpstan-ignore property.onlyWritten

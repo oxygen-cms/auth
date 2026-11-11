@@ -4,10 +4,8 @@ namespace Oxygen\Auth\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Oxygen\Auth\Permissions\Permissions as PermissionsService;
 use Oxygen\Auth\Permissions\OwnedByUser;
-use Webmozart\Assert\Assert;
 
 class OwnerPermissions {
 
@@ -33,7 +31,6 @@ class OwnerPermissions {
     public function handle(Request $request, Closure $next, string $permission, string $permissionIfOwned, ...$models) {
         $owned = true;
         $route = $request->route();
-        Assert::isInstanceOf($route, Route::class);
         foreach($route->parameters() as $parameter) {
             if(!($parameter instanceof OwnedByUser) || $parameter->getOwner() != $request->user()) {
                 $owned = false;

@@ -6,7 +6,6 @@ use Illuminate\Routing\Controller;
 use Oxygen\Auth\Repository\GroupRepositoryInterface;
 use Oxygen\Core\Controller\BasicCrudTrait;
 use Oxygen\Core\Controller\SoftDeleteCrudTrait;
-use Webmozart\Assert\Assert;
 
 class GroupsController extends Controller {
 
@@ -23,7 +22,7 @@ class GroupsController extends Controller {
         'pluralResource' => 'Groups'
     ];
 
-    private GroupRepositoryInterface $repository;
+    protected GroupRepositoryInterface $repository; // used by the CRUD traits
 
     /**
      * Constructs the GroupsController.
@@ -32,7 +31,6 @@ class GroupsController extends Controller {
      */
     public function __construct(GroupRepositoryInterface $repository) {
         $this->repository = $repository;
-        Assert::isInstanceOf($this->repository, GroupRepositoryInterface::class);
         self::setupLangMappings(self::LANG_MAPPINGS);
     }
 
